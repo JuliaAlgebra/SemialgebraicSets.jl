@@ -1,5 +1,5 @@
 export spolynomial, gröbnerbasis, groebnerbasis
-export presort!, dummyselection, normalselection
+export Buchberger, presort!, dummyselection, normalselection
 
 """
     spolynomial(p::AbstractPolynomialLike, q::AbstractPolynomialLike)
@@ -110,13 +110,12 @@ Buchberger() = Buchberger(presort!, normalselection)
 function gröbnerbasis!(F::AbstractVector{<:APL}, algo=Buchberger())
     algo.pre!(F)
     B = Set{NTuple{2, Int}}(Iterators.filter(t -> t[1] < t[2], (i, j) for i in eachindex(F), j in eachindex(F)))
-    count = 0
+    ev(p) = p(variables(p)=>(-0.83005, -3*(-0.83005)^4))
     while !isempty(B)
         (i, j) = algo.sel(F, B)
         lmi = leadingmonomial(F[i])
         lmj = leadingmonomial(F[j])
         if !isconstant(gcd(lmi, lmj)) && !criterion(F, B, i, j)
-            count += 1
             r = rem(spolynomial(F[i], F[j]), F)
             if !isapproxzero(r)
                 I = eachindex(F)
@@ -129,13 +128,12 @@ function gröbnerbasis!(F::AbstractVector{<:APL}, algo=Buchberger())
         end
         delete!(B, (i, j))
     end
-    @show count
     reducebasis!(F)
     clean!(F)
     F
 end
-function gröbnerbasis(F::Vector{<:APL})
+function gröbnerbasis(F::Vector{<:APL}, args...)
     T = Base.promote_op(rem, eltype(F), typeof(F))
-    gröbnerbasis!(copy!(similar(F, T), F))
+    gröbnerbasis!(copy!(similar(F, T), F), args...)
 end
 const groebnerbasis = gröbnerbasis
