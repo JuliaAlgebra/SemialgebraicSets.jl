@@ -1,5 +1,4 @@
 import Base: +
-export spolynomial
 
 abstract type AbstractPolynomialIdeal end
 
