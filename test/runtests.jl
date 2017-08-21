@@ -18,15 +18,15 @@ using MultivariatePolynomials
     S = (@set Int32(2)*x^2*y == 0 && 1.0x^2*y >= 0 && (6//3)*x^2*y == -y && 1.5x+y >= 0)
     S2 = S ∩ V
     S3 = V ∩ S
-    @test S2.p == S3.p == S.p
-    @test S2.V.I.p == S3.V.I.p
+    @test inequalities(S2) == inequalities(S3) == S.p
+    @test equalities(S2) == S3.V.I.p
     T = (@set x*y^2 == -1 && x^2 + y^2 <= 1)
     V2 = @set T.V && V && x + y == 2.0
     @test V2 isa AlgebraicSet
-    @test V2.I.p == [x + y - 2.0; T.V.I.p; V.I.p]
+    @test V2.I.p == [x + y - 2.0; equalities(T); equalities(V)]
     S4 = @set S && T
-    @test S4.p == [S.p; T.p]
-    @test S4.V.I.p == [S.V.I.p; T.V.I.p]
+    @test S4.p == [S.p; inequalities(T)]
+    @test equalities(S4) == [S.V.I.p; T.V.I.p]
 end
 
 # CLO15
@@ -149,6 +149,9 @@ end
     @polyvar x y z
     V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2
     @test iszerodimensional(V)
+    iszd, B = monomialbasis(V.I)
+    @test iszd
+    @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
     testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
 end
 

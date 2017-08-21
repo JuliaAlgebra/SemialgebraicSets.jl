@@ -1,4 +1,5 @@
 export iszerodimensional
+export algebraicset, equalities
 
 mutable struct AlgebraicSet{T, PT<:APL{T}, S<:AbstractAlgebraicSolver} <: AbstractAlgebraicSet
     I::PolynomialIdeal{T, PT}

@@ -1,5 +1,7 @@
 import Base: +
 
+export monomialbasis
+
 abstract type AbstractPolynomialIdeal end
 
 mutable struct PolynomialIdeal{T, PT<:APL{T}} <: AbstractPolynomialIdeal
@@ -34,7 +36,7 @@ function monomialbasis(I)
     # if x_i^n is in the leading monomials, lv[i] <= n
     lv = -ones(Int, nvariables(mv))
     for m in mv
-        d = deg(m)
+        d = degree(m)
         if d == maximum(exponents(m))
             # univariate monomial
             if iszero(d)

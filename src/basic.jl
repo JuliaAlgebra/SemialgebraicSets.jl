@@ -1,3 +1,5 @@
+export inequalities, basicsemialgebraicset
+
 struct BasicSemialgebraicSet{T, PT<:APL{T}} <: AbstractBasicSemialgebraicSet
     V::AlgebraicSet{T, PT}
     p::Vector{PT}
@@ -14,7 +16,9 @@ function basicsemialgebraicset(V, p)
     BasicSemialgebraicSet(V, p)
 end
 
+equalities(S::BasicSemialgebraicSet) = equalities(S.V)
 addequality!(S::BasicSemialgebraicSet, p) = addequality!(S.V, p)
+inequalities(S::BasicSemialgebraicSet) = S.p
 addinequality!(S::BasicSemialgebraicSet, p) = push!(S.p, p)
 
 Base.intersect(S::BasicSemialgebraicSet, T::BasicSemialgebraicSet) = BasicSemialgebraicSet(S.V ∩ T.V, [S.p; T.p])
