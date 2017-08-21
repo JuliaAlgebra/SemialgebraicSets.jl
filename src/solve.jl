@@ -98,9 +98,9 @@ struct ReorderedSchurMultiplicationMatricesSolver{T} <: AbstractMultiplicationMa
     ztol::T
 end
 ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, ɛ, ɛ)
-# Example 5.2 and 5.3 of CGT97 in tests may fail if we do not multiply by 16.
-# This is a sign that we need to improve the clustering but for new let's just multiply by 16 by default.
-ReorderedSchurMultiplicationMatricesSolver() = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(Float64) * 16)
+# Example 5.2 and 5.3 of CGT97 in tests may fail if we do not multiply by 8.
+# This is a sign that we need to improve the clustering but for new let's just multiply by 8 by default.
+ReorderedSchurMultiplicationMatricesSolver() = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(Float64) * 8)
 
 function solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, solver::ReorderedSchurMultiplicationMatricesSolver) where T
     λ = rand(length(Ms))
