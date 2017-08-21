@@ -22,6 +22,7 @@ Base.intersect(S, T, U...) = intersect(intersect(S, T), U...)
 
 include("groebner.jl")
 include("ideal.jl")
+include("solve.jl")
 include("variety.jl")
 include("basic.jl")
 

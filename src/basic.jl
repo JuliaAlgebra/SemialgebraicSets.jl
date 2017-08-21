@@ -5,7 +5,14 @@ end
 function BasicSemialgebraicSet{T, PT}() where {T, PT<:APL{T}}
     BasicSemialgebraicSet(AlgebraicSet{T, PT}(), PT[])
 end
+function BasicSemialgebraicSet(V::AlgebraicSet{T, PT}, p::Vector{PS}) where {T, PT, PS}
+    PU = promote_type(PT, PS)
+    BasicSemialgebraicSet(AlgebraicSet{T, PU}(V), Vector{PU}(p))
+end
 #BasicSemialgebraicSet{T, PT<:APL{T}}(V::AlgebraicSet{T, PT}, p::Vector{PT}) = BasicSemialgebraicSet{T, PT}(V, p)
+function basicsemialgebraicset(V, p)
+    BasicSemialgebraicSet(V, p)
+end
 
 addequality!(S::BasicSemialgebraicSet, p) = addequality!(S.V, p)
 addinequality!(S::BasicSemialgebraicSet, p) = push!(S.p, p)

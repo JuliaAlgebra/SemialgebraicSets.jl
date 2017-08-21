@@ -68,12 +68,12 @@ function builddomain(domains, domaineqs, domainineqs)
         end
 
         lin = gensym()
-        code = :( $code; $lin = AlgebraicSet{$T, $PT}(PolynomialIdeal{$T, $PT}($PT[$eqs...])) )
+        code = :( $code; $lin = algebraicset($PT[$eqs...]) )
         basic = gensym()
         if isempty(domainineqs)
             code = :( $code; $basic = $lin )
         else
-            code = :( $code; $basic = BasicSemialgebraicSet{$T, $PT}($lin, $PT[$ineqs...]) )
+            code = :( $code; $basic = basicsemialgebraicset($lin, $PT[$ineqs...]) )
         end
 
         if !isempty(domains)
