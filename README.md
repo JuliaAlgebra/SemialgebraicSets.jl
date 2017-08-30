@@ -1,5 +1,10 @@
 # SemialgebraicSets
 
+| **PackageEvaluator** | **Build Status** |
+|:--------------------:|:----------------:|
+| [![][pkg-0.6-img]][pkg-0.6-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] |
+| [![][pkg-0.7-img]][pkg-0.7-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
+
 Extension of MultivariatePolynomials to semialgebraic sets, i.e. sets defined by inequalities and equalities between polynomials.
 The following example shows how to build an [algebraic set/algebraic variety](https://en.wikipedia.org/wiki/Algebraic_variety)
 ```julia
@@ -13,7 +18,7 @@ using TypedPolynomials
 @set x == z^2 && y == z^3
 ```
 
-Once the algebraic set has been created, you can check whether it is zero-dimensional and if it is the case, you can get the finite number of elements of the set simply by iterating over it, or by usin g `collect` to transform it into an array containing the solutions.
+Once the algebraic set has been created, you can check whether it is zero-dimensional and if it is the case, you can get the finite number of elements of the set simply by iterating over it, or by using `collect` to transform it into an array containing the solutions.
 ```julia
 V = @set y == x^2 && z == x^3
 iszerodimensional(V) # should return false
@@ -31,3 +36,17 @@ using TypedPolynomials
 @set y^2 == x^3 - x && x <= 0
 @set y^2 == x^3 - x && x >= 1
 ```
+
+[pkg-0.6-img]: http://pkg.julialang.org/badges/SemialgebraicSets_0.6.svg
+[pkg-0.6-url]: http://pkg.julialang.org/?pkg=SemialgebraicSets
+[pkg-0.7-img]: http://pkg.julialang.org/badges/SemialgebraicSets_0.7.svg
+[pkg-0.7-url]: http://pkg.julialang.org/?pkg=SemialgebraicSets
+
+[build-img]: https://travis-ci.org/blegat/SemialgebraicSets.jl.svg?branch=master
+[build-url]: https://travis-ci.org/blegat/SemialgebraicSets.jl
+[winbuild-img]: https://ci.appveyor.com/api/projects/status/ndyfs82ciou9rmf4/branch/master?svg=true
+[winbuild-url]: https://ci.appveyor.com/project/blegat/semialgebraicsets-jl-7se5w/branch/master
+[coveralls-img]: https://coveralls.io/repos/github/blegat/SemialgebraicSets.jl/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/blegat/SemialgebraicSets.jl?branch=master
+[codecov-img]: http://codecov.io/github/blegat/SemialgebraicSets.jl/coverage.svg?branch=master
+[codecov-url]: http://codecov.io/github/blegat/SemialgebraicSets.jl?branch=master

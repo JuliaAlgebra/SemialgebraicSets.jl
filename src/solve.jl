@@ -109,7 +109,7 @@ function solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, so
 end
 
 # Deterministic part
-function _solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, λ, solver::ReorderedSchurMultiplicationMatricesSolver) where T
+function _solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, λ, solver::ReorderedSchurMultiplicationMatricesSolver) where T<:Real
     @assert length(Ms) == length(λ)
     n = length(λ)
     M = sum(λ .* Ms)
