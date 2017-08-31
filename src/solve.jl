@@ -87,17 +87,15 @@ function multiplicationmatrices(V::AbstractAlgebraicSet, algo::GröbnerBasisMult
     end
 end
 
-
+include("schur.jl")
 
 """
 Corless, R. M.; Gianni, P. M. & Trager, B. M. A reordered Schur factorization method for zero-dimensional polynomial systems with multiple roots Proceedings of the 1997 international symposium on Symbolic and algebraic computation, 1997, 133-140
 """
 struct ReorderedSchurMultiplicationMatricesSolver{T} <: AbstractMultiplicationMatricesSolver
-    atol::T
-    rtol::T
-    ztol::T
+    ɛ::T
 end
-ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, ɛ, ɛ)
+#ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, ɛ, ɛ)
 # Example 5.2 and 5.3 of CGT97 in tests may fail if we do not multiply by 8.
 # This is a sign that we need to improve the clustering but for new let's just multiply by 8 by default.
 ReorderedSchurMultiplicationMatricesSolver() = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(Float64) * 8)
@@ -112,36 +110,7 @@ end
 function _solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, λ, solver::ReorderedSchurMultiplicationMatricesSolver) where T<:Real
     @assert length(Ms) == length(λ)
     n = length(λ)
-    M = sum(λ .* Ms)
-    sf = schurfact(M)
-    # M = Z * T * Z' and "values" gives the eigenvalues
-    Z = sf[:Z]
-    v = sf[:values]
-    # Clustering
-    clusters = Vector{Int}[]
-    λavg = eltype(v)[]
-    for i in eachindex(v)
-        k = 0
-        best = zero(Base.promote_op(abs, eltype(v)))
-        for j in eachindex(clusters)
-            if isapprox(v[i], λavg[j]; atol=solver.atol, rtol=solver.rtol)
-                d = abs(v[i] - λavg[j])
-                if iszero(k) || d < best
-                    k = j
-                    best = abs(v[i] - λavg[j])
-                end
-            end
-        end
-        if iszero(k)
-            push!(λavg, v[i])
-            push!(clusters, [i])
-        else
-            nk = length(clusters[k])
-            λavg[k] = (λavg[k] * nk + v[i]) / (nk + 1)
-            push!(clusters[k], i)
-        end
-    end
-    clusters = clusters[isapproxzero.(imag.(λavg); ztol=solver.ztol)]
+    Z, clusters = clusterordschur(sum(λ .* Ms), solver.ɛ)
     r = length(clusters)
     vals = [zeros(T, n) for k in 1:r]
     for k in 1:r

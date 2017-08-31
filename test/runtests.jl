@@ -89,6 +89,24 @@ end
     testb(presort!, normalselection)
 end
 
+@testset "Section 4.1 MD95" begin
+    η = 1e-10
+    A = [zeros(10, 1) eye(10); zeros(1, 10) 0.5]
+    A[10, 11] = 0
+    A[10, 1] = η
+    @test SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2] == [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
+end
+
+@testset "Example 4.1 MD95" begin
+    A = [  0  0  0  1  0  0;
+           0  0  0  0  1  0;
+           0  0  0  0  0  1;
+          -1  0  1 -1  0  0;
+          -1  0  1 -2 -1  0;
+          -1  0  1 -2 -2 -1]
+    @test SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2] == [[1, 5, 6], [2]]
+end
+
 function testelements(X, Y; atol=Base.rtoldefault(Float64), kwargs...)
     @test length(X) == length(Y)
     for x in X
@@ -112,49 +130,6 @@ function testelements(X, Y; atol=Base.rtoldefault(Float64), kwargs...)
         @test found
     end
 end
-
-@testset "Example 5.1 of CGT97" begin
-    ɛ = 1e-4
-    Iɛ = [1 - ɛ 0
-          0     1 + ɛ]
-    J = [0 1
-         1 0]
-    Z = zeros(2, 2)
-    A = [Iɛ Z
-         Z  J]
-    B = [J Z
-         Z Iɛ]
-    α = 0.219
-    testelements(SemialgebraicSets._solvemultiplicationmatrices([A, B], [α, 1-α], ReorderedSchurMultiplicationMatricesSolver()), [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]; rtol=1e-7)
-end
-
-@testset "Example 4.3 of MD95" begin
-    @polyvar x y
-    V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3
-    # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
-    # the second and third do not seem that close but when the three first are averaged it is very close to zero.
-    V.solver = algebraicsolver(ReorderedSchurMultiplicationMatricesSolver(1e-5))
-    @test iszerodimensional(V)
-    testelements(V, [[0.66209555, 0.935259169], [0.66209555, -0.935259169], [0.0516329456, -0.025825086], [0.0516329456, 0.025825086], [0, 0]])
-end
-
-# 5.2 and 5.3 sometimes fail, we need better clustering
-#@testset "Example 5.2 of CGT97" begin
-#    @polyvar x y z
-#    V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2
-#    @test iszerodimensional(V)
-#    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
-#end
-#
-#@testset "Example 5.3 of CGT97" begin
-#    @polyvar x y z
-#    V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2
-#    @test iszerodimensional(V)
-#    iszd, B = monomialbasis(V.I)
-#    @test iszd
-#    @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
-#    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
-#end
 
 @testset "Zero-dimensional ideal" begin
     @polyvar x y z
@@ -186,6 +161,47 @@ end
     @test iszerodimensional(V)
     testelements(V, [[2, √2], [2, -√2]])
 end
+
+@testset "Example 5.1 of CGT97" begin
+    ɛ = 1e-4
+    Iɛ = [1 - ɛ 0
+          0     1 + ɛ]
+    J = [0 1
+         1 0]
+    Z = zeros(2, 2)
+    A = [Iɛ Z
+         Z  J]
+    B = [J Z
+         Z Iɛ]
+    α = 0.219
+    testelements(SemialgebraicSets._solvemultiplicationmatrices([A, B], [α, 1-α], ReorderedSchurMultiplicationMatricesSolver()), [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]; rtol=1e-7)
+end
+
+#@testset "Example 4.3 of MD95" begin
+#    @polyvar x y
+#    V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3
+#    # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
+#    # the second and third do not seem that close but when the three first are averaged it is very close to zero.
+#    @test iszerodimensional(V)
+#    testelements(V, [[0.66209555, 0.935259169], [0.66209555, -0.935259169], [0.0516329456, -0.025825086], [0.0516329456, 0.025825086], [0, 0]])
+#end
+#
+#@testset "Example 5.2 of CGT97" begin
+#    @polyvar x y z
+#    V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2
+#    @test iszerodimensional(V)
+#    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
+#end
+#
+#@testset "Example 5.3 of CGT97" begin
+#    @polyvar x y z
+#    V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2
+#    @test iszerodimensional(V)
+#    iszd, B = monomialbasis(V.I)
+#    @test iszd
+#    @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
+#    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
+#end
 
 @testset "Complex not yet implemented" begin
     @polyvar x
