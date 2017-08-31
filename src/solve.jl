@@ -92,16 +92,15 @@ include("schur.jl")
 """
 Corless, R. M.; Gianni, P. M. & Trager, B. M. A reordered Schur factorization method for zero-dimensional polynomial systems with multiple roots Proceedings of the 1997 international symposium on Symbolic and algebraic computation, 1997, 133-140
 """
-struct ReorderedSchurMultiplicationMatricesSolver{T} <: AbstractMultiplicationMatricesSolver
+struct ReorderedSchurMultiplicationMatricesSolver{T, RNGT <: AbstractRNG} <: AbstractMultiplicationMatricesSolver
     ɛ::T
+    rng::RNGT
 end
-#ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, ɛ, ɛ)
-# Example 5.2 and 5.3 of CGT97 in tests may fail if we do not multiply by 8.
-# This is a sign that we need to improve the clustering but for new let's just multiply by 8 by default.
-ReorderedSchurMultiplicationMatricesSolver() = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(Float64) * 8)
+ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, Base.GLOBAL_RNG)
+ReorderedSchurMultiplicationMatricesSolver{T}() where T = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(real(T)))
 
 function solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, solver::ReorderedSchurMultiplicationMatricesSolver) where T
-    λ = rand(length(Ms))
+    λ = rand(solver.rng, length(Ms))
     λ /= sum(λ)
     _solvemultiplicationmatrices(Ms, λ, solver)
 end
@@ -129,10 +128,16 @@ function algebraicsolver(algo::AbstractMultiplicationMatricesAlgorithm,
                          solver::AbstractMultiplicationMatricesSolver)
     SolverUsingMultiplicationMatrices(algo, solver)
 end
-function algebraicsolver(solver::AbstractMultiplicationMatricesSolver)
-    algebraicsolver(GröbnerBasisMultiplicationMatricesAlgorithm(), solver)
-end
 
-function defaultalgebraicsolver(::Type{T}) where T
-    algebraicsolver(GröbnerBasisMultiplicationMatricesAlgorithm(), ReorderedSchurMultiplicationMatricesSolver())
+defaultmultiplicationmatricesalgorithm(p) = GröbnerBasisMultiplicationMatricesAlgorithm()
+defaultmultiplicationmatricessolver(p::AbstractVector{PT}) where {T, PT<:APL{T}} = ReorderedSchurMultiplicationMatricesSolver{coefficienttype(p)}()
+
+function defaultalgebraicsolver(p)
+    algebraicsolver(defaultmultiplicationmatricesalgorithm(p), defaultmultiplicationmatricessolver(p))
+end
+function defaultalgebraicsolver(p, algo::AbstractMultiplicationMatricesAlgorithm)
+    algebraicsolver(algo, defaultmultiplicationmatricessolver(p))
+end
+function defaultalgebraicsolver(p, solver::AbstractMultiplicationMatricesSolver)
+    algebraicsolver(defaultmultiplicationmatricesalgorithm(p), solver)
 end

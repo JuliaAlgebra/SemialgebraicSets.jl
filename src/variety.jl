@@ -1,6 +1,13 @@
 export iszerodimensional
 export algebraicset, equalities
 
+type DefaultAlgebraicSetLibrary{S<:AbstractAlgebraicSolver}
+    solver::S
+end
+
+defaultalgebraicsetlibrary(::Vector{<:APL}, solver::AbstractAlgebraicSolver) = DefaultAlgebraicSetLibrary(solver)
+defaultalgebraicsetlibrary(p::Vector{<:APL}, solveroralgo...) = defaultalgebraicsolver(p, solveroralgo...)
+
 mutable struct AlgebraicSet{T, PT<:APL{T}, S<:AbstractAlgebraicSolver} <: AbstractAlgebraicSet
     I::PolynomialIdeal{T, PT}
     elements::Vector{Vector{T}}
@@ -10,15 +17,16 @@ mutable struct AlgebraicSet{T, PT<:APL{T}, S<:AbstractAlgebraicSolver} <: Abstra
 end
 AlgebraicSet{T, PT, S}(I::PolynomialIdeal{T, PT}, solver::S) where {T, PT, S} = AlgebraicSet{T, PT, S}(I, Vector{T}[], false, false, solver)
 AlgebraicSet(I::PolynomialIdeal{T, PT}, solver::S) where {T, PT, S} = AlgebraicSet{T, PT, S}(I, solver)
-AlgebraicSet(I::PolynomialIdeal{T}) where {T} = AlgebraicSet(I, defaultalgebraicsolver(T))
-AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}())
-AlgebraicSet(p::Vector) = AlgebraicSet(PolynomialIdeal(p))
+AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
+AlgebraicSet(p::Vector, solver) = AlgebraicSet(PolynomialIdeal(p), solver)
 
-algebraicset(p::Vector) = AlgebraicSet(p)
+algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = AlgebraicSet(p, lib.solver)
+algebraicset(p::Vector, solver) = algebraicset(p, defaultalgebraicsetlibrary(p, solver))
+algebraicset(p::Vector) = algebraicset(p, defaultalgebraicsetlibrary(p))
 
 equalities(V::AlgebraicSet) = V.I.p
 addequality!(V::AlgebraicSet, p) = push!(V.I.p, p)
-Base.intersect(S::AlgebraicSet, T::AlgebraicSet) = AlgebraicSet(S.I + T.I)
+Base.intersect(S::AlgebraicSet, T::AlgebraicSet) = AlgebraicSet(S.I + T.I, S.solver)
 
 defaultalgebraicsolver(V::AlgebraicSet) = V.solver
 function computeelements!(V::AlgebraicSet{T}) where T

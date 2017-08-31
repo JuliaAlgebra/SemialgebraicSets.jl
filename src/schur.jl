@@ -70,38 +70,47 @@ function clusterordschur(M, ɛ)
     sf = schurfact(M)
     # M = Z * T * Z' and "values" gives the eigenvalues
     Z = sf[:Z]
-    v = sf[:values]
+    v = copy(sf[:values])
     # documentation says that the error on the eigenvalues is ɛ * norm(T) / conditionnumber
     nT = norm(sf.T)
     _atol(i) = ɛ * nT / conditionnumber(sf, i)
-    atol = _atol.(1:length(v))
+    n = length(v)
+    atol = _atol.(1:n)
     # Clustering
-    clusters = Vector{Int}[]
-    λavg = eltype(v)[]
-    minatol = eltype(atol)[]
-    atolavg = eltype(atol)[]
-    for i in eachindex(v)
-        k = 0
-        best = one(Base.promote_op(abs, eltype(v)))
-        for j in eachindex(clusters)
-            d = abs(v[i] - λavg[j]) / min(atol[i], minatol[j])
-            if d < best
-                k = j
-                best = d
+    clusters = Vector{Int}[[i] for i in 1:n]
+    ONE = abs(one(Base.promote_op(/, eltype(v), eltype(atol))))
+    # For eigenvalues not clustered yet, their eigenvalues is quite large.
+    # Therefore, if we cluster all i, j close enough at once we migth cluster too much
+    # The technique used here is to cluster only the closest pair.
+    # Once they are matched, a new atol is computed and if the cluster is complete,
+    # this atol will be small which will avoid addition of new eigenvalues.
+    while true
+        I = 0
+        J = 0
+        best = ONE
+        for i in eachindex(clusters)
+            for j in 1:(i-1)
+                d = abs(v[i] - v[j]) / min(atol[i], atol[j])
+                if d < best
+                    I = i
+                    J = j
+                    best = d
+                end
             end
         end
-        if iszero(k)
-            push!(λavg, v[i])
-            push!(clusters, [i])
-            push!(atolavg, atol[i])
-            push!(minatol, atol[i])
+        if best < ONE
+            # merge I with J
+            nI = length(clusters[I])
+            nJ = length(clusters[J])
+            v[I] = (v[I] * nI + v[J] * nJ) / (nI + nJ)
+            append!(clusters[I], clusters[J])
+            atol[I] = _atol(clusters[I])
+            deleteat!(v, J)
+            deleteat!(clusters, J)
+            deleteat!(atol, J)
         else
-            nk = length(clusters[k])
-            λavg[k] = (λavg[k] * nk + v[i]) / (nk + 1)
-            push!(clusters[k], i)
-            atolavg[k] = _atol(clusters[k])
-            minatol[k] = min(minatol[k], atol[i])
+            break
         end
     end
-    Z, clusters[map(k -> isapproxzero(imag(λavg[k]); ztol=minatol[k]), eachindex(clusters))]
+    Z, clusters[map(k -> isapproxzero(imag(v[k]); ztol=atol[k]), eachindex(clusters))]
 end

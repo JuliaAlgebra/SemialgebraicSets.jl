@@ -44,7 +44,7 @@ function appendconstraints!(domains, domaineqs, domainineqs, expr, _error)
     nothing
 end
 
-function builddomain(domains, domaineqs, domainineqs)
+function builddomain(domains, domaineqs, domainineqs, library...)
     domainaffs = gensym()
 
     PT = gensym()
@@ -68,7 +68,7 @@ function builddomain(domains, domaineqs, domainineqs)
         end
 
         lin = gensym()
-        code = :( $code; $lin = algebraicset($PT[$eqs...]) )
+        code = :( $code; $lin = algebraicset($PT[$eqs...], $(esc.(library)...)) )
         basic = gensym()
         if isempty(domainineqs)
             code = :( $code; $basic = $lin )
@@ -85,12 +85,12 @@ function builddomain(domains, domaineqs, domainineqs)
     domainaffs, code
 end
 
-macro set(expr)
+macro set(expr, library...)
     domains = []
     domaineqs = []
     domainineqs = []
     appendconstraints!(domains, domaineqs, domainineqs, expr, msg -> error("In @set($expr: ", msg))
-    domainvar, domaincode = builddomain(domains, domaineqs, domainineqs)
+    domainvar, domaincode = builddomain(domains, domaineqs, domainineqs, library...)
     quote
         $domaincode
         $domainvar
