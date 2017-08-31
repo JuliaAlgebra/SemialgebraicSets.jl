@@ -94,7 +94,7 @@ end
     A = [zeros(10, 1) eye(10); zeros(1, 10) 0.5]
     A[10, 11] = 0
     A[10, 1] = η
-    @test sort.(SemialgebraicSets.clusterordschur(A, 2e-1)[2]) == [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
+    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) == [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
 end
 
 @testset "Example 4.1 MD95" begin
@@ -187,12 +187,18 @@ end
 #    @polyvar x y
 #    F = -2-7x+14x^3-7x^5+x^7 + (7-42x^2+35x^4-7x^6)*y + (16+42x-70x^3+21x^5)*y^2 + (-14+70x^2-35x^4)*y^3 + (-20-35x+35x^3)*y^4 + (7-21x^2)*y^5 + (8+7x)*y^6 - y^7 - y^8
 #    G = differentiate(F, y)
-#    V = @set F == 0 && G == 0
+#    @show G
+#    V = @set F == 0 && G == 0 solver
 #    @test iszerodimensional(V)
-#    iszd, B = monomialbasis(V.I)
-#    @test iszd
-#    @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
-#    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
+#    sols = [[-3.91298, -1.95065], [-3.23984, -1.56367], [-3.21615, -1.41421], [-3.09474, -1.84776], [3.6497, 1.84776], [3.65578, 1.80399], [2.2928, 1.84776], [2.66119, 1.41421], [2.68379, 1.23369], [2.5673, 0.765367], [0.600779, 1.84776], [0.969172, 1.41421], [-1.85925, -1.41422], [-1.40272, -1.84775], [-2.01312, -0.812102], [-2.01235, -0.765367], [1.26106, 0.265359], [-0.481613, 0.765367], [1.03657, -0.765367], [-0.483778, 0.630692], [-0.0458213, -1.84776], [-1.80194, 0.]]
+#    @show length(sols)
+#    #testelements(V, sols)
+#    @show length(V)
+#    for v in collect(V)
+#        @show v
+#        @show F(variables(F) => v)
+#        @show G(variables(G) => v)
+#    end
 #end
 
 @testset "Complex not yet implemented" begin

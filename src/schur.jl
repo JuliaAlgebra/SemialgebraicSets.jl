@@ -1,7 +1,8 @@
 import Base.LinAlg: Schur, BlasInt, checksquare, chkstride1
 import Base.LAPACK: liblapack, chklapackerror, @blasfunc
 
-# Taken from JuliaLang/julia/base/linalg/lapack.jl
+# Taken from JuliaLang/julia/base/linalg/lapack.jl and fixed for compq == 'E'
+# See https://github.com/JuliaLang/julia/pull/23521
 for (trexc, trsen, tgsen, elty) in
     ((:dtrexc_, :dtrsen_, :dtgsen_, :Float64),
      (:strexc_, :strsen_, :stgsen_, :Float32))
@@ -56,29 +57,58 @@ for (trexc, trsen, tgsen, elty) in
         end
     end
 end
-function conditionnumber(sf::Schur, i)
+# If i, i+1 are conjugate pair, then they need to be either both in I or both not in I.
+# If one of them is in I and the other is not then LAPACK will consider that both of them are in I.
+function conditionnumber(sf::Schur, I)
     n = length(sf.values)
     select = zeros(BlasInt, n)
-    select[i] = 1
+    select[I] = 1
     _trsen!('E', 'N', select, copy(sf.T), copy(sf.Z))[4]
 end
 
-# Algorithms for intersecting parametric and algebraic curves II: multiple intersections
-# Manocha, Dinesh and Demmel, James
-# Graphical Models and Image Processing, 1995
-function clusterordschur(M, ɛ)
+# Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
+# Graphical Models and Image Processing, Elsevier, 1995, 57, 81-100
+function clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     sf = schurfact(M)
     # M = Z * T * Z' and "values" gives the eigenvalues
     Z = sf[:Z]
-    v = copy(sf[:values])
+    v = sf[:values]
     # documentation says that the error on the eigenvalues is ɛ * norm(T) / conditionnumber
     nT = norm(sf.T)
-    _atol(i) = ɛ * nT / conditionnumber(sf, i)
-    n = length(v)
-    atol = _atol.(1:n)
-    # Clustering
-    clusters = Vector{Int}[[i] for i in 1:n]
-    ONE = abs(one(Base.promote_op(/, eltype(v), eltype(atol))))
+
+    _atol(I) = ɛ * nT / conditionnumber(sf, I)
+
+    A = Base.promote_op(_atol, Int)
+    V = real(eltype(v))
+
+    ONE = one(Base.promote_op(/, V, A))
+
+    clusters = Vector{Int}[]
+    λ = V[]
+    atol = A[]
+    # conditionnumber requires that conjugate pair need to be treated together so we first need to handle them
+    # If they are in the same cluster then pair them, otherwise it is complex solution so we reject them
+    i = 1
+    while i <= endof(v)
+        if isreal(v[i])
+            push!(clusters, [i])
+            push!(λ, v[i])
+            push!(atol, _atol(i))
+            i += 1
+        else
+            @assert i < endof(v) && !isreal(v[i+1])
+            pairatol = _atol([i, i+1])
+            if abs(v[i] - v[i+1]) / pairatol < ONE
+                # Pair conjugate pairs into a real eigenvalue
+                push!(clusters, [i, i+1])
+                push!(λ, real((v[i] + v[i+1]) / 2)) # The imaginary part should be zero anyway
+                push!(atol, pairatol)
+            end
+            i += 2
+        end
+    end
+    σ = sortperm(λ)
+
     # For eigenvalues not clustered yet, their eigenvalues is quite large.
     # Therefore, if we cluster all i, j close enough at once we migth cluster too much
     # The technique used here is to cluster only the closest pair.
@@ -90,7 +120,7 @@ function clusterordschur(M, ɛ)
         best = ONE
         for i in eachindex(clusters)
             for j in 1:(i-1)
-                d = abs(v[i] - v[j]) / min(atol[i], atol[j])
+                d = abs(λ[i] - λ[j]) / min(atol[i], atol[j])
                 if d < best
                     I = i
                     J = j
@@ -102,15 +132,15 @@ function clusterordschur(M, ɛ)
             # merge I with J
             nI = length(clusters[I])
             nJ = length(clusters[J])
-            v[I] = (v[I] * nI + v[J] * nJ) / (nI + nJ)
+            λ[I] = (λ[I] * nI + λ[J] * nJ) / (nI + nJ)
             append!(clusters[I], clusters[J])
             atol[I] = _atol(clusters[I])
-            deleteat!(v, J)
+            deleteat!(λ, J)
             deleteat!(clusters, J)
             deleteat!(atol, J)
         else
             break
         end
     end
-    Z, clusters[map(k -> isapproxzero(imag(v[k]); ztol=atol[k]), eachindex(clusters))]
+    Z, clusters
 end
