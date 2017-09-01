@@ -130,7 +130,8 @@ function algebraicsolver(algo::AbstractMultiplicationMatricesAlgorithm,
 end
 
 defaultmultiplicationmatricesalgorithm(p) = GröbnerBasisMultiplicationMatricesAlgorithm()
-defaultmultiplicationmatricessolver(p::AbstractVector{PT}) where {T, PT<:APL{T}} = ReorderedSchurMultiplicationMatricesSolver{coefficienttype(p)}()
+defaultmultiplicationmatricessolver(::Type{T}) where T = ReorderedSchurMultiplicationMatricesSolver{T}()
+defaultmultiplicationmatricessolver(::AbstractVector{PT}) where {T, PT<:APL{T}} = defaultmultiplicationmatricessolver(T)
 
 function defaultalgebraicsolver(p)
     algebraicsolver(defaultmultiplicationmatricesalgorithm(p), defaultmultiplicationmatricessolver(p))

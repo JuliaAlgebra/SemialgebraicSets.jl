@@ -14,6 +14,7 @@ using MultivariatePolynomials
     addequality!(S, x^2 - y)
     addinequality!(S, x + y - 1)
     @test S isa BasicSemialgebraicSet
+    @test BasicSemialgebraicSet{Int, polynomialtype(x, Int)}() isa BasicSemialgebraicSet{Float64, polynomialtype(x, Float64)}
     @test Int32(2)*x^2*y isa MultivariatePolynomials.AbstractTerm{Int32}
     S = (@set Int32(2)*x^2*y == 0 && 1.0x^2*y >= 0 && (6//3)*x^2*y == -y && 1.5x+y >= 0)
     S2 = S ∩ V
