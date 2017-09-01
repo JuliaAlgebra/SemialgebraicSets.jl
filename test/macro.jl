@@ -1,5 +1,5 @@
 @testset "Basic semialgebraic set" begin
-    @polyvar x y
+    Mod.@polyvar x y
     @test isa(FullSpace(), FullSpace)
     V = @set x * y == 1
     @test V isa AlgebraicSet

@@ -12,14 +12,14 @@
 #end
 
 @testset "S-polynomial" begin
-    @polyvar x y z
+    Mod.@polyvar x y z
     @test spolynomial(x^3*y^2 - x^2*y^3 + x, 3x^4*y + y^2) == -x^3*y^3 + x^2 - y^3/3
     @test spolynomial(y - x^2, z - x^3) == z - x*y
     @test spolynomial(x^3 - 2x*y, x^2*y - 2y^2 + x) == -x^2
 end
 
 @testset "Groebner basis" begin
-    @polyvar x y z
+    Mod.@polyvar x y z
     function testg(G, H)
         presort!(G)
         _isz(f) = isapproxzero(rem(f, H))

@@ -36,7 +36,7 @@ end
 solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), MersenneTwister(0))
 
 @testset "Zero-dimensional ideal" begin
-    @polyvar x y z
+    Mod.@polyvar x y z
     V = @set x == y
     @test !iszerodimensional(V)
     @test_throws ErrorException start(V)
@@ -83,7 +83,7 @@ end
 end
 
 @testset "Example 4.3 of MD95" begin
-    @polyvar x y
+    Mod.@polyvar x y
     V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3 solver
     # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
     # the second and third do not seem that close but when the three first are averaged it is very close to zero.
@@ -92,7 +92,7 @@ end
 end
 
 @testset "Example 5.2 of CGT97" begin
-    @polyvar x y z
+    Mod.@polyvar x y z
     V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2 solver
     @test iszerodimensional(V)
     iszd, B = monomialbasis(V.I)
@@ -102,7 +102,7 @@ end
 end
 
 #@testset "Example 4.4 of MD95 and 5.3 of CGT97" begin
-#    @polyvar x y
+#    Mod.@polyvar x y
 #    F = -2-7x+14x^3-7x^5+x^7 + (7-42x^2+35x^4-7x^6)*y + (16+42x-70x^3+21x^5)*y^2 + (-14+70x^2-35x^4)*y^3 + (-20-35x+35x^3)*y^4 + (7-21x^2)*y^5 + (8+7x)*y^6 - y^7 - y^8
 #    G = differentiate(F, y)
 #    @show G
@@ -120,7 +120,7 @@ end
 #end
 
 @testset "Complex not yet implemented" begin
-    @polyvar x
+    Mod.@polyvar x
     V = @set x^2 == im
     @test_throws MethodError collect(V)
 end

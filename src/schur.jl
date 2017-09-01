@@ -69,14 +69,6 @@ end
 # Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
 # Graphical Models and Image Processing, Elsevier, 1995, 57, 81-100
 function clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
-    if size(M, 1) == 1
-        # Schur sometimes return NaN with 1x1 matrix
-        ones(eltype(M), 1, 1), [[1]]
-    else
-        _clusterordschur(M, ɛ)
-    end
-end
-function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     sf = schurfact(M)
     # M = Z * T * Z' and "values" gives the eigenvalues
     Z = sf[:Z]
