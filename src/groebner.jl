@@ -25,9 +25,9 @@ function reducebasis!(F::AbstractVector{<:APL})
             G = @view F[setdiff(keep, j)]
             r = rem(F[j], G)
             if isapproxzero(r)
-                deleteat!(keep, findfirst(j))
+                deleteat!(keep, findfirst(keep, j))
                 push!(del, j)
-                changed = true
+                changed = true # Should probably not set that, no need to do one more loop int this case
             elseif leadingmonomial(r) != leadingmonomial(F[j])
                 F[j] = r
                 changed = true
@@ -110,7 +110,6 @@ Buchberger() = Buchberger(presort!, normalselection)
 function gröbnerbasis!(F::AbstractVector{<:APL}, algo=Buchberger())
     algo.pre!(F)
     B = Set{NTuple{2, Int}}(Iterators.filter(t -> t[1] < t[2], (i, j) for i in eachindex(F), j in eachindex(F)))
-    ev(p) = p(variables(p)=>(-0.83005, -3*(-0.83005)^4))
     while !isempty(B)
         (i, j) = algo.sel(F, B)
         lmi = leadingmonomial(F[i])

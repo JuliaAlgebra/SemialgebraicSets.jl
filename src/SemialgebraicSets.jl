@@ -3,6 +3,7 @@ __precompile__()
 module SemialgebraicSets
 
 using MultivariatePolynomials
+const MP = MultivariatePolynomials
 
 const APL = AbstractPolynomialLike
 

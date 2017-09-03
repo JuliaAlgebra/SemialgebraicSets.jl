@@ -20,13 +20,15 @@ function PolynomialIdeal{T, PT}() where {T, PT<:APL{T}}
 end
 (+)(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p])
 
+MP.variables(I::PolynomialIdeal) = variables(I.p)
+
 function computegröbnerbasis!(I::PolynomialIdeal)
     if !I.gröbnerbasis
         gröbnerbasis!(I.p)
         I.gröbnerbasis = true
     end
 end
-function monomialbasis(I)
+function monomialbasis(I, vars=variables(I))
     computegröbnerbasis!(I)
     if isempty(I.p)
         return false, monomialtype(eltype(I.p))[]
@@ -34,7 +36,7 @@ function monomialbasis(I)
     mv = monovec(leadingmonomial.(I.p))
     # monovec makes sure all monomials have the same variables
     # if x_i^n is in the leading monomials, lv[i] <= n
-    lv = -ones(Int, nvariables(mv))
+    lv = -ones(Int, length(vars))
     for m in mv
         d = degree(m)
         if d == maximum(exponents(m))
@@ -49,5 +51,5 @@ function monomialbasis(I)
     if any(lv .< 0)
         return false, monomialtype(eltype(I.p))[]
     end
-    return true, monomials(variables(I.p), 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
+    return true, monomials(vars, 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
 end

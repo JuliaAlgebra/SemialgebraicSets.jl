@@ -67,6 +67,27 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     testelements(V, [[2, √2], [2, -√2]])
 end
 
+@testset "Projective zero-dimensional ideal" begin
+    Mod.@polyvar x y z
+    V = projectivealgebraicset([x - y], solver)
+    @test iszerodimensional(V)
+    testelements(V, [[1, 1]])
+    V = @set x + y == z solver
+    V.projective = true
+    @test !iszerodimensional(V)
+    V = @set y == 2x solver
+    V.projective = true
+    @test iszerodimensional(V)
+    testelements(V, [[1, 2]])
+    V = @set x + y == y solver
+    V.projective = true
+    @test iszerodimensional(V)
+    testelements(V, [[0, 1]])
+    V = projectivealgebraicset([x + y - x])
+    @test iszerodimensional(V)
+    testelements(V, [[1, 0]])
+end
+
 @testset "Example 5.1 of CGT97" begin
     ɛ = 1e-4
     Iɛ = [1 - ɛ 0

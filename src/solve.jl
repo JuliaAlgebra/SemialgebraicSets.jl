@@ -73,16 +73,16 @@ function multiplicationmatrix(V::AbstractAlgebraicSet, v::AbstractVariable, B)
 end
 
 function multiplicationmatrices(V::AbstractAlgebraicSet, algo::GröbnerBasisMultiplicationMatricesAlgorithm)::Nullable{Vector{AbstractMatrix{eltype(eltype(V))}}}
-    iszd, B = monomialbasis(V.I)
+    vars = variables(V.I)
+    iszd, B = monomialbasis(V.I, vars)
     if !iszd
         nothing
     else
-        vs = variables(B)
-        n = length(vs)
+        n = length(vars)
         if iszero(n)
             Matrix{eltype(eltype(T))}[]
         else
-            [multiplicationmatrix(V, v, B) for v in vs]
+            [multiplicationmatrix(V, v, B) for v in vars]
         end
     end
 end
