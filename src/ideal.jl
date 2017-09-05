@@ -4,27 +4,31 @@ export monomialbasis
 
 abstract type AbstractPolynomialIdeal end
 
-mutable struct PolynomialIdeal{T, PT<:APL{T}} <: AbstractPolynomialIdeal
+mutable struct PolynomialIdeal{T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm} <: AbstractPolynomialIdeal
     p::Vector{PT}
     gröbnerbasis::Bool
+    algo::A
 end
-function PolynomialIdeal{T, PT}(p::Vector{PT}) where {T, PT<:APL{T}}
-    PolynomialIdeal{T, PT}(p, false)
+function PolynomialIdeal{T, PT}(p::Vector{PT}, algo::A) where {T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm}
+    PolynomialIdeal{T, PT, A}(p, false, algo)
 end
-function PolynomialIdeal(p::Vector{PT}) where {T, PT<:APL{T}}
+function PolynomialIdeal(p::Vector{PT}, algo) where {T, PT<:APL{T}}
     S = Base.promote_op(/, T, T)
-    PolynomialIdeal{S, polynomialtype(PT, S)}(AbstractVector{polynomialtype(PT, S)}(p))
+    PolynomialIdeal{S, polynomialtype(PT, S)}(AbstractVector{polynomialtype(PT, S)}(p), algo)
 end
 function PolynomialIdeal{T, PT}() where {T, PT<:APL{T}}
-    PolynomialIdeal(PT[])
+    PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(p))
 end
-(+)(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p])
+
+ideal(p, algo=defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
+
+(+)(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p], I.algo)
 
 MP.variables(I::PolynomialIdeal) = variables(I.p)
 
 function computegröbnerbasis!(I::PolynomialIdeal)
     if !I.gröbnerbasis
-        gröbnerbasis!(I.p)
+        gröbnerbasis!(I.p, I.algo)
         I.gröbnerbasis = true
     end
 end

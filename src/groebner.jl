@@ -15,7 +15,7 @@ function spolynomial(p::APL, q::APL)
     MultivariatePolynomials._div(m, leadingterm(p)) * p - MultivariatePolynomials._div(m, leadingterm(q)) * q
 end
 
-function reducebasis!(F::AbstractVector{<:APL})
+function reducebasis!(F::AbstractVector{<:APL}; kwargs...)
     changed = true
     while changed
         changed = false
@@ -23,8 +23,8 @@ function reducebasis!(F::AbstractVector{<:APL})
         del = Int[]
         for j in eachindex(F)
             G = @view F[setdiff(keep, j)]
-            r = rem(F[j], G)
-            if isapproxzero(r)
+            r = rem(F[j], G; kwargs...)
+            if isapproxzero(r; kwargs...)
                 deleteat!(keep, findfirst(keep, j))
                 push!(del, j)
                 changed = true # Should probably not set that, no need to do one more loop int this case
@@ -36,8 +36,6 @@ function reducebasis!(F::AbstractVector{<:APL})
         deleteat!(F, del)
     end
 end
-
-clean!(F::AbstractVector{<:APL}) = map!(monic, F, F)
 
 ext(i, j) = (min(i, j), max(i, j))
 
@@ -97,17 +95,21 @@ function normalselection(F, B)
 end
 # TODO sugar and double sugar selections
 
-struct Buchberger
+defaultgröbnerbasisalgorithm(p) = Buchberger()
+abstract type AbstractGröbnerBasisAlgorithm end
+
+struct Buchberger <: AbstractGröbnerBasisAlgorithm
+    ztol::Float64
     pre!::Function
     sel::Function
 end
 #Buchberger() = Buchberger(presort!, dummyselection)
-Buchberger() = Buchberger(presort!, normalselection)
+Buchberger(ztol=Base.rtoldefault(Float64)) = Buchberger(ztol, presort!, normalselection)
 
 # Taken from Theorem 9 of
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition
-function gröbnerbasis!(F::AbstractVector{<:APL}, algo=Buchberger())
+function gröbnerbasis!(F::AbstractVector{<:APL}, algo=defaultgröbnerbasisalgorithm(F))
     algo.pre!(F)
     B = Set{NTuple{2, Int}}(Iterators.filter(t -> t[1] < t[2], (i, j) for i in eachindex(F), j in eachindex(F)))
     while !isempty(B)
@@ -115,8 +117,9 @@ function gröbnerbasis!(F::AbstractVector{<:APL}, algo=Buchberger())
         lmi = leadingmonomial(F[i])
         lmj = leadingmonomial(F[j])
         if !isconstant(gcd(lmi, lmj)) && !criterion(F, B, i, j)
+            #r = rem(spolynomial(F[i], F[j]), F; ztol=algo.ztol)
             r = rem(spolynomial(F[i], F[j]), F)
-            if !isapproxzero(r)
+            if !isapproxzero(r; ztol=algo.ztol)
                 I = eachindex(F)
                 push!(F, r)
                 n = last(eachindex(F))
@@ -127,8 +130,8 @@ function gröbnerbasis!(F::AbstractVector{<:APL}, algo=Buchberger())
         end
         delete!(B, (i, j))
     end
-    reducebasis!(F)
-    clean!(F)
+    reducebasis!(F, ztol=algo.ztol)
+    map!(monic, F, F)
     F
 end
 function gröbnerbasis(F::Vector{<:APL}, args...)

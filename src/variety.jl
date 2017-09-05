@@ -6,32 +6,31 @@ type DefaultAlgebraicSetLibrary{S<:AbstractAlgebraicSolver}
 end
 
 defaultalgebraicsetlibrary(::Vector{<:APL}, solver::AbstractAlgebraicSolver) = DefaultAlgebraicSetLibrary(solver)
-defaultalgebraicsetlibrary(p::Vector{<:APL}, solveroralgo...) = defaultalgebraicsolver(p, solveroralgo...)
+defaultalgebraicsetlibrary(p::Vector{<:APL}, solveroralgo...) = defaultalgebraicsetlibrary(p, defaultalgebraicsolver(p, solveroralgo...))
 
-mutable struct AlgebraicSet{T, PT<:APL{T}, S<:AbstractAlgebraicSolver} <: AbstractAlgebraicSet
-    I::PolynomialIdeal{T, PT}
+mutable struct AlgebraicSet{T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver} <: AbstractAlgebraicSet
+    I::PolynomialIdeal{T, PT, A}
     projective::Bool
     elements::Vector{Vector{T}}
     elementscomputed::Bool
     iszerodimensional::Bool
     solver::S
 end
-AlgebraicSet{T, PT, S}(I::PolynomialIdeal{T, PT}, solver::S) where {T, PT, S} = AlgebraicSet{T, PT, S}(I, false, Vector{T}[], false, false, solver)
-AlgebraicSet(I::PolynomialIdeal{T, PT}, solver::S) where {T, PT, S} = AlgebraicSet{T, PT, S}(I, solver)
+AlgebraicSet{T, PT, A, S}(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = AlgebraicSet{T, PT, A, S}(I, false, Vector{T}[], false, false, solver)
+AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = AlgebraicSet{T, PT, A, S}(I, solver)
 AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
-AlgebraicSet(p::Vector, solver) = AlgebraicSet(PolynomialIdeal(p), solver)
+AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = AlgebraicSet(ideal(p, algo), solver)
 
-algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = AlgebraicSet(p, lib.solver)
+
+algebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p)) = AlgebraicSet(p, algo, lib.solver)
 algebraicset(p::Vector, solver) = algebraicset(p, defaultalgebraicsetlibrary(p, solver))
-algebraicset(p::Vector) = algebraicset(p, defaultalgebraicsetlibrary(p))
 
-function projectivealgebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary)
-    V = AlgebraicSet(p, lib.solver)
+function projectivealgebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p))
+    V = AlgebraicSet(p, algo, lib.solver)
     V.projective = true
     V
 end
 projectivealgebraicset(p::Vector, solver) = projectivealgebraicset(p, defaultalgebraicsetlibrary(p, solver))
-projectivealgebraicset(p::Vector) = projectivealgebraicset(p, defaultalgebraicsetlibrary(p))
 
 nequalities(V::AlgebraicSet) = length(V.I.p)
 equalities(V::AlgebraicSet) = V.I.p
@@ -59,13 +58,13 @@ function elements(V::AlgebraicSet{T})::Nullable{Vector{eltype(V)}} where T
         I = V.I
         els = Vector{T}[]
         for v in variables(I)
-            I1 = I + PolynomialIdeal([v - 1])
+            I1 = I + ideal([v - 1], V.I.algo)
             els1 = elements(AlgebraicSet(I1, V.solver))
             if isnull(els1)
                 return nothing
             end
             append!(els, get(els1))
-            I = I + PolynomialIdeal([v])
+            I = I + ideal([v], V.I.algo)
         end
         els
     else
