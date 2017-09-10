@@ -21,16 +21,20 @@ AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = Alge
 AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
 AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = AlgebraicSet(ideal(p, algo), solver)
 
-
+algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = AlgebraicSet(p, defaultgröbnerbasisalgorithm(p), lib.solver)
 algebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p)) = AlgebraicSet(p, algo, lib.solver)
 algebraicset(p::Vector, solver) = algebraicset(p, defaultalgebraicsetlibrary(p, solver))
 
+projectivealgebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = projectivealgebraicset(p, defaultgröbnerbasisalgorithm(p), lib.solver)
 function projectivealgebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p))
     V = AlgebraicSet(p, algo, lib.solver)
     V.projective = true
     V
 end
-projectivealgebraicset(p::Vector, solver) = projectivealgebraicset(p, defaultalgebraicsetlibrary(p, solver))
+projectivealgebraicset(p::Vector, algo, solver) = projectivealgebraicset(p, algo, defaultalgebraicsetlibrary(p, solver))
+projectivealgebraicset(p::Vector, solver) = projectivealgebraicset(p, defaultgröbnerbasisalgorithm(p), defaultalgebraicsetlibrary(p, solver))
+
+ideal(V::AlgebraicSet) = V.I
 
 nequalities(V::AlgebraicSet) = length(V.I.p)
 equalities(V::AlgebraicSet) = V.I.p

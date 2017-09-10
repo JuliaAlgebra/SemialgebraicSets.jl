@@ -1,6 +1,6 @@
 import Base: +
 
-export monomialbasis
+export monomialbasis, ideal
 
 abstract type AbstractPolynomialIdeal end
 
@@ -17,7 +17,7 @@ function PolynomialIdeal(p::Vector{PT}, algo) where {T, PT<:APL{T}}
     PolynomialIdeal{S, polynomialtype(PT, S)}(AbstractVector{polynomialtype(PT, S)}(p), algo)
 end
 function PolynomialIdeal{T, PT}() where {T, PT<:APL{T}}
-    PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(p))
+    PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(PT))
 end
 
 ideal(p, algo=defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
@@ -25,6 +25,11 @@ ideal(p, algo=defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
 (+)(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p], I.algo)
 
 MP.variables(I::PolynomialIdeal) = variables(I.p)
+
+function Base.rem(p::AbstractPolynomialLike, I::PolynomialIdeal)
+    computegröbnerbasis!(I)
+    rem(p, I.p)
+end
 
 function computegröbnerbasis!(I::PolynomialIdeal)
     if !I.gröbnerbasis

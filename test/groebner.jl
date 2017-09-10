@@ -40,10 +40,19 @@ end
          x^5 + x*y/3,
          y^6 + 3y^5 + 9x^4 + 9x^3*y + y^3/3 - x^2 - x*y - y^2 - 3x]
     function testb(pre, sel)
-        testg(groebnerbasis(F, Buchberger(pre, sel)), H)
+        testg(groebnerbasis(F, Buchberger(Base.rtoldefault(Float64), pre, sel)), H)
     end
     testb(identity, dummyselection)
     testb(identity, normalselection)
     testb(presort!, dummyselection)
     testb(presort!, normalselection)
+end
+
+@testset "Reduce" begin
+    Mod.@polyvar x y
+    V1 = @set x == 1 && y == x^2
+    @test rem(x^2 + 3x*y + 2y, ideal(V1)) == 6
+    # Needs MP v0.1.1
+    #V2 = @set x == y^2
+    #@test rem(x^2 + 3x*y + 2y + y^4, ideal(V2)) == rem(2y^4 + 3y^3 + 2y, ideal(V2))
 end
