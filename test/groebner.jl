@@ -52,7 +52,10 @@ end
     Mod.@polyvar x y
     V1 = @set x == 1 && y == x^2
     @test rem(x^2 + 3x*y + 2y, ideal(V1)) == 6
+    p = x^2 + x
+    V2 = FullSpace()
+    @test rem(p, ideal(V2)) === p
     # Needs MP v0.1.1
-    #V2 = @set x == y^2
-    #@test rem(x^2 + 3x*y + 2y + y^4, ideal(V2)) == rem(2y^4 + 3y^3 + 2y, ideal(V2))
+    #V3 = @set x == y^2
+    #@test rem(x^2 + 3x*y + 2y + y^4, ideal(V3)) == rem(2y^4 + 3y^3 + 2y, ideal(V3))
 end

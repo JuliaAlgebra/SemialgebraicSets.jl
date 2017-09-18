@@ -4,6 +4,11 @@ export monomialbasis, ideal
 
 abstract type AbstractPolynomialIdeal end
 
+struct EmptyPolynomialIdeal
+end
+ideal(p::FullSpace, algo=defaultgröbnerbasisalgorithm(p)) = EmptyPolynomialIdeal()
+Base.rem(p::AbstractPolynomialLike, I::EmptyPolynomialIdeal) = p
+
 mutable struct PolynomialIdeal{T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm} <: AbstractPolynomialIdeal
     p::Vector{PT}
     gröbnerbasis::Bool
