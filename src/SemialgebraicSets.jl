@@ -20,8 +20,11 @@ addinequality!(S::AbstractAlgebraicSet, p) = throw(ArgumentError("Cannot add ine
 
 struct FullSpace <: AbstractAlgebraicSet
 end
+function Base.show(io::IO, ::FullSpace)
+    print(io, "R^n")
+end
 
-Base.intersect(S, T, U...) = intersect(intersect(S, T), U...)
+Base.intersect(S::AbstractSemialgebraicSet, T::AbstractSemialgebraicSet, U::AbstractSemialgebraicSet...) = intersect(intersect(S, T), U...)
 
 include("groebner.jl")
 include("ideal.jl")
