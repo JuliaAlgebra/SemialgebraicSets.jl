@@ -42,11 +42,11 @@ using TypedPolynomials
 [pkg-0.7-img]: http://pkg.julialang.org/badges/SemialgebraicSets_0.7.svg
 [pkg-0.7-url]: http://pkg.julialang.org/?pkg=SemialgebraicSets
 
-[build-img]: https://travis-ci.org/blegat/SemialgebraicSets.jl.svg?branch=master
-[build-url]: https://travis-ci.org/blegat/SemialgebraicSets.jl
+[build-img]: https://travis-ci.org/JuliaAlgebra/SemialgebraicSets.jl.svg?branch=master
+[build-url]: https://travis-ci.org/JuliaAlgebra/SemialgebraicSets.jl
 [winbuild-img]: https://ci.appveyor.com/api/projects/status/ndyfs82ciou9rmf4/branch/master?svg=true
 [winbuild-url]: https://ci.appveyor.com/project/blegat/semialgebraicsets-jl-7se5w/branch/master
-[coveralls-img]: https://coveralls.io/repos/github/blegat/SemialgebraicSets.jl/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/blegat/SemialgebraicSets.jl?branch=master
-[codecov-img]: http://codecov.io/github/blegat/SemialgebraicSets.jl/coverage.svg?branch=master
-[codecov-url]: http://codecov.io/github/blegat/SemialgebraicSets.jl?branch=master
+[coveralls-img]: https://coveralls.io/repos/github/JuliaAlgebra/SemialgebraicSets.jl/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/JuliaAlgebra/SemialgebraicSets.jl?branch=master
+[codecov-img]: http://codecov.io/github/JuliaAlgebra/SemialgebraicSets.jl/coverage.svg?branch=master
+[codecov-url]: http://codecov.io/github/JuliaAlgebra/SemialgebraicSets.jl?branch=master
