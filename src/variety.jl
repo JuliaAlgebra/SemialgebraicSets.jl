@@ -1,7 +1,7 @@
 export iszerodimensional
 export algebraicset, projectivealgebraicset, equalities
 
-type DefaultAlgebraicSetLibrary{S<:AbstractAlgebraicSolver}
+struct DefaultAlgebraicSetLibrary{S<:AbstractAlgebraicSolver}
     solver::S
 end
 
