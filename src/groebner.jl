@@ -136,6 +136,6 @@ function gröbnerbasis!(F::AbstractVector{<:APL}, algo=defaultgröbnerbasisalgor
 end
 function gröbnerbasis(F::Vector{<:APL}, args...)
     T = Base.promote_op(rem, eltype(F), typeof(F))
-    gröbnerbasis!(copy!(similar(F, T), F), args...)
+    gröbnerbasis!(copyto!(similar(F, T), F), args...)
 end
 const groebnerbasis = gröbnerbasis
