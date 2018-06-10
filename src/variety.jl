@@ -57,17 +57,17 @@ function Base.show(io::IO, V::AbstractAlgebraicSet)
 end
 
 defaultalgebraicsolver(V::AlgebraicSet) = V.solver
-function elements(V::AlgebraicSet{T})::Nullable{Vector{eltype(V)}} where T
+function elements(V::AlgebraicSet{T}) where T
     if V.projective
         I = V.I
         els = Vector{T}[]
         for v in variables(I)
             I1 = I + ideal([v - 1], V.I.algo)
             els1 = elements(AlgebraicSet(I1, V.solver))
-            if isnull(els1)
+            if els1 === nothing
                 return nothing
             end
-            append!(els, get(els1))
+            append!(els, els1)
             I = I + ideal([v], V.I.algo)
         end
         els
@@ -78,9 +78,9 @@ end
 function computeelements!(V::AlgebraicSet{T}) where T
     if !V.elementscomputed
         els = elements(V)
-        V.iszerodimensional = !isnull(els)
-        if !isnull(els)
-            V.elements = get(els)
+        V.iszerodimensional = els !== nothing
+        if V.iszerodimensional
+            V.elements = els
         end
         V.elementscomputed = true
     end

@@ -8,7 +8,7 @@ Solver of algebraic equations.
 abstract type AbstractAlgebraicSolver end
 
 """
-    solvealgebraicequations(V::AbstractAlgebraicSet, algo::AbstractAlgebraicSolver)::Nullable{Vector{<:Vector}}
+    solvealgebraicequations(V::AbstractAlgebraicSet, algo::AbstractAlgebraicSolver)::Union{Nothing, Vector{<:Vector}}}
 
 Solve the algebraic equations for which `V` is the set of solutions using the algorithm `algo`.
 Returns a nullable which is `null` if `V` is not zero-dimensional and is the list of solutions otherwise.
@@ -23,7 +23,7 @@ Algorithm computing multiplication matrices from algebraic equations.
 abstract type AbstractMultiplicationMatricesAlgorithm end
 
 """
-    multiplicationmatrices(V::AbstractAlgebraicSet, algo::AbstractMultiplicationMatricesAlgorithm)::Nullable{Vector{<:AbstractMatrix}}
+    multiplicationmatrices(V::AbstractAlgebraicSet, algo::AbstractMultiplicationMatricesAlgorithm)::Union{Nothing, Vector{<:AbstractMatrix}}
 
 Computing multiplication matrices from the algebraic equations for which `V` is the set of solution using the algorithm `algo`.
 Returns a nullable which is `null` if `V` is not zero-dimensional and is the list of multiplication matrices otherwise.
@@ -51,12 +51,12 @@ struct SolverUsingMultiplicationMatrices{A<:AbstractMultiplicationMatricesAlgori
     solver::S
 end
 
-function solvealgebraicequations(V::AbstractAlgebraicSet, solver::SolverUsingMultiplicationMatrices)::Nullable{Vector{eltype(V)}}
+function solvealgebraicequations(V::AbstractAlgebraicSet, solver::SolverUsingMultiplicationMatrices)
     Ms = multiplicationmatrices(V, solver.algo)
-    if isnull(Ms)
+    if Ms === nothing
         nothing
     else
-        solvemultiplicationmatrices(get(Ms), solver.solver)
+        solvemultiplicationmatrices(Ms, solver.solver)
     end
 end
 
@@ -72,7 +72,7 @@ function multiplicationmatrix(V::AbstractAlgebraicSet, v::AbstractVariable, B)
     M
 end
 
-function multiplicationmatrices(V::AbstractAlgebraicSet, algo::GröbnerBasisMultiplicationMatricesAlgorithm)::Nullable{Vector{AbstractMatrix{eltype(eltype(V))}}}
+function multiplicationmatrices(V::AbstractAlgebraicSet, algo::GröbnerBasisMultiplicationMatricesAlgorithm)
     vars = variables(V.I)
     iszd, B = monomialbasis(V.I, vars)
     if !iszd
