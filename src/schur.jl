@@ -84,19 +84,25 @@ function clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     end
 end
 function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
-    sf = schurfact(M)
     # M = Z * T * Z' and "values" gives the eigenvalues
-    Z = sf[:Z]
-    v = sf[:values]
+    if VERSION <= v"0.7-"
+        sf = schurfact(M)
+        Z = sf[:Z]
+        v = sf[:values]
+    else
+        sf = schur(M)
+        Z = sf.Z
+        v = sf.values
+    end
     # documentation says that the error on the eigenvalues is ɛ * norm(T) / conditionnumber
     nT = norm(sf.T)
 
     _atol(I) = ɛ * nT / conditionnumber(sf, I)
 
-    A = Base.promote_op(_atol, Int)
+    A = typeof(_atol(1))
     V = real(eltype(v))
 
-    ONE = one(Base.promote_op(/, V, A))
+    ONE = one(one(V) / one(A))
 
     clusters = Vector{Int}[]
     λ = V[]
