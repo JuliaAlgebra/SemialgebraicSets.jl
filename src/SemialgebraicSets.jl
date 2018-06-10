@@ -2,6 +2,8 @@ __precompile__()
 
 module SemialgebraicSets
 
+using Compat
+
 using MultivariatePolynomials
 const MP = MultivariatePolynomials
 
