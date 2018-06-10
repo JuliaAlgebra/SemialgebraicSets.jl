@@ -34,6 +34,7 @@ function testelements(X, Y; atol=Base.rtoldefault(Float64), kwargs...)
 end
 
 # We use a fixed RNG in the tests to decrease nondeterminism. There is still nondeterminism in LAPACK though
+using Random
 solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), MersenneTwister(0))
 
 @testset "Zero-dimensional ideal" begin
