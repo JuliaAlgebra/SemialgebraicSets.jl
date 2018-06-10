@@ -25,7 +25,7 @@ function reducebasis!(F::AbstractVector{<:APL}; kwargs...)
             G = @view F[setdiff(keep, j)]
             r = rem(F[j], G; kwargs...)
             if isapproxzero(r; kwargs...)
-                deleteat!(keep, findfirst(keep, j))
+                deleteat!(keep, findfirst(isequal(j), keep))
                 push!(del, j)
                 changed = true # Should probably not set that, no need to do one more loop int this case
             elseif leadingmonomial(r) != leadingmonomial(F[j])
