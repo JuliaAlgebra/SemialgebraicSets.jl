@@ -64,7 +64,7 @@ struct GröbnerBasisMultiplicationMatricesAlgorithm <: AbstractMultiplicationMat
 end
 
 function multiplicationmatrix(V::AbstractAlgebraicSet, v::AbstractVariable, B)
-    M = Matrix{eltype(eltype(V))}(length(B), length(B))
+    M = Matrix{eltype(eltype(V))}(undef, length(B), length(B))
     for i in 1:length(B)
         p = rem(v * B[i], equalities(V))
         M[:, i] = coefficients(p, B)
