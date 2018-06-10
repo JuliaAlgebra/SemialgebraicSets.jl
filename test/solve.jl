@@ -7,9 +7,10 @@
 # Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
 # Graphical Models and Image Processing, Elsevier, 1995, 57, 81-100
 
+using LinearAlgebra # for I
 @testset "Section 4.1 MD95" begin
     η = 1e-10
-    A = [zeros(10, 1) eye(10); zeros(1, 10) 0.5]
+    A = [zeros(10, 1) Matrix(I, 10, 10); zeros(1, 10) 0.5]
     A[10, 11] = 0
     A[10, 1] = η
     @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) == [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
