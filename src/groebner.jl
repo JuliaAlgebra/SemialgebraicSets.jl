@@ -123,8 +123,8 @@ function gröbnerbasis!(F::AbstractVector{<:APL}, algo=defaultgröbnerbasisalgor
                 I = eachindex(F)
                 push!(F, r)
                 n = last(eachindex(F))
-                for i in I
-                    push!(B, (i, n))
+                for ii in I
+                    push!(B, (ii, n))
                 end
             end
         end
