@@ -1,5 +1,6 @@
 using SemialgebraicSets
-using Base.Test
+using Compat
+using Compat.Test
 
 using MultivariatePolynomials
 
