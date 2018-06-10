@@ -110,14 +110,14 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     # conditionnumber requires that conjugate pair need to be treated together so we first need to handle them
     # If they are in the same cluster then pair them, otherwise it is complex solution so we reject them
     i = 1
-    while i <= endof(v)
+    while i <= lastindex(v)
         if isreal(v[i])
             push!(clusters, [i])
             push!(λ, v[i])
             push!(atol, _atol(i))
             i += 1
         else
-            @assert i < endof(v) && !isreal(v[i+1])
+            @assert i < lastindex(v) && !isreal(v[i+1])
             pairatol = _atol([i, i+1])
             if abs(v[i] - v[i+1]) / pairatol < ONE
                 # Pair conjugate pairs into a real eigenvalue
