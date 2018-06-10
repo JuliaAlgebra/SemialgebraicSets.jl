@@ -1,62 +1,69 @@
-import Base.LinAlg: Schur, BlasInt, checksquare, chkstride1
-import Base.LAPACK: liblapack, chklapackerror, @blasfunc
+import Compat.LinearAlgebra: Schur, BlasInt, checksquare, chkstride1
+import Compat.LinearAlgebra.LAPACK: liblapack, chklapackerror, @blasfunc
 
-# Taken from JuliaLang/julia/base/linalg/lapack.jl and fixed for compq == 'E'
-# See https://github.com/JuliaLang/julia/pull/23521
-for (trexc, trsen, tgsen, elty) in
-    ((:dtrexc_, :dtrsen_, :dtgsen_, :Float64),
-     (:strexc_, :strsen_, :stgsen_, :Float32))
-    @eval begin
-        # *     .. Scalar Arguments ..
-        #       CHARACTER          COMPQ, JOB
-        #       INTEGER            INFO, LDQ, LDT, LIWORK, LWORK, M, N
-        #       DOUBLE PRECISION   S, SEP
-        # *     ..
-        # *     .. Array Arguments ..
-        #       LOGICAL            SELECT( * )
-        #       INTEGER            IWORK( * )
-        #       DOUBLE PRECISION   Q( LDQ, * ), T( LDT, * ), WI( * ), WORK( * ), WR( * )
-        function _trsen!(compq::Char, job::Char, select::StridedVector{BlasInt},
-                        T::StridedMatrix{$elty}, Q::StridedMatrix{$elty})
-            chkstride1(T, Q, select)
-            n = checksquare(T)
-            ldt = max(1, stride(T, 2))
-            ldq = max(1, stride(Q, 2))
-            wr = similar(T, $elty, n)
-            wi = similar(T, $elty, n)
-            m = sum(select)
-            work = Vector{$elty}(1)
-            lwork = BlasInt(-1)
-            iwork = Vector{BlasInt}(1)
-            liwork = BlasInt(-1)
-            info = Ref{BlasInt}()
-            select = convert(Array{BlasInt}, select)
-            s = Ref{$elty}(zero($elty))
-            sep = Ref{$elty}(zero($elty))
-            for i = 1:2
-                ccall((@blasfunc($trsen), liblapack), Void,
-                    (Ptr{UInt8}, Ptr{UInt8}, Ptr{BlasInt}, Ptr{BlasInt},
-                    Ptr{$elty}, Ptr{BlasInt}, Ptr{$elty}, Ptr{BlasInt},
-                    Ptr{$elty}, Ptr{$elty}, Ptr{BlasInt}, Ref{$elty}, Ref{$elty},
-                    Ptr{$elty}, Ptr{BlasInt}, Ptr{BlasInt}, Ptr{BlasInt},
-                    Ptr{BlasInt}),
-                    &compq, &job, select, &n,
-                    T, &ldt, Q, &ldq,
-                    wr, wi, &m, s, sep,
-                    work, &lwork, iwork, &liwork,
-                    info)
-                chklapackerror(info[])
-                if i == 1 # only estimated optimal lwork, liwork
-                    lwork  = BlasInt(real(work[1]))
-                    liwork = BlasInt(real(iwork[1]))
-                    work   = Vector{$elty}(lwork)
-                    iwork  = Vector{BlasInt}(liwork)
+using Compat.LinearAlgebra
+
+if VERSION <= v"0.7-"
+    # Taken from JuliaLang/julia/base/linalg/lapack.jl and fixed for compq == 'E'
+    # See https://github.com/JuliaLang/julia/pull/23521
+    for (trexc, trsen, tgsen, elty) in
+        ((:dtrexc_, :dtrsen_, :dtgsen_, :Float64),
+         (:strexc_, :strsen_, :stgsen_, :Float32))
+        @eval begin
+            # *     .. Scalar Arguments ..
+            #       CHARACTER          COMPQ, JOB
+            #       INTEGER            INFO, LDQ, LDT, LIWORK, LWORK, M, N
+            #       DOUBLE PRECISION   S, SEP
+            # *     ..
+            # *     .. Array Arguments ..
+            #       LOGICAL            SELECT( * )
+            #       INTEGER            IWORK( * )
+            #       DOUBLE PRECISION   Q( LDQ, * ), T( LDT, * ), WI( * ), WORK( * ), WR( * )
+            function _trsen!(compq::Char, job::Char, select::StridedVector{BlasInt},
+                            T::StridedMatrix{$elty}, Q::StridedMatrix{$elty})
+                chkstride1(T, Q, select)
+                n = checksquare(T)
+                ldt = max(1, stride(T, 2))
+                ldq = max(1, stride(Q, 2))
+                wr = similar(T, $elty, n)
+                wi = similar(T, $elty, n)
+                m = sum(select)
+                work = Vector{$elty}(1)
+                lwork = BlasInt(-1)
+                iwork = Vector{BlasInt}(1)
+                liwork = BlasInt(-1)
+                info = Ref{BlasInt}()
+                select = convert(Array{BlasInt}, select)
+                s = Ref{$elty}(zero($elty))
+                sep = Ref{$elty}(zero($elty))
+                for i = 1:2
+                    ccall((@blasfunc($trsen), liblapack), Void,
+                        (Ptr{UInt8}, Ptr{UInt8}, Ptr{BlasInt}, Ptr{BlasInt},
+                        Ptr{$elty}, Ptr{BlasInt}, Ptr{$elty}, Ptr{BlasInt},
+                        Ptr{$elty}, Ptr{$elty}, Ptr{BlasInt}, Ref{$elty}, Ref{$elty},
+                        Ptr{$elty}, Ptr{BlasInt}, Ptr{BlasInt}, Ptr{BlasInt},
+                        Ptr{BlasInt}),
+                        &compq, &job, select, &n,
+                        T, &ldt, Q, &ldq,
+                        wr, wi, &m, s, sep,
+                        work, &lwork, iwork, &liwork,
+                        info)
+                    chklapackerror(info[])
+                    if i == 1 # only estimated optimal lwork, liwork
+                        lwork  = BlasInt(real(work[1]))
+                        liwork = BlasInt(real(iwork[1]))
+                        work   = Vector{$elty}(lwork)
+                        iwork  = Vector{BlasInt}(liwork)
+                    end
                 end
+                T, Q, iszero(wi) ? wr : complex.(wr, wi), s[], sep[]
             end
-            T, Q, iszero(wi) ? wr : complex.(wr, wi), s[], sep[]
         end
     end
+else
+    _trsen! = LinearAlgebra.LAPACK.trsen!
 end
+
 # If i, i+1 are conjugate pair, then they need to be either both in I or both not in I.
 # If one of them is in I and the other is not then LAPACK will consider that both of them are in I.
 function conditionnumber(sf::Schur, I)
