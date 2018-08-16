@@ -41,7 +41,11 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     Mod.@polyvar x y z
     V = @set x == y
     @test !iszerodimensional(V)
-    @test_throws ErrorException start(V)
+    @static if VERSION >= v"0.7-"
+        @test_throws ErrorException iterate(V)
+    else
+        @test_throws ErrorException start(V)
+    end
     @test_throws ErrorException length(V)
     V = @set 4x^2 == -5x && 3x^3 == 0 solver
     @test V.solver.solver === solver

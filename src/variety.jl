@@ -92,7 +92,7 @@ end
 
 Base.eltype(V::AlgebraicSet{T}) where T = Vector{T}
 
-for f in [:length, :start, :endof, :next, :done, :getindex]
+for f in ((VERSION >= v"0.7-") ? [:length, :iterate, :lastindex, :getindex] : [:length, :start, :endof, :next, :done, :getindex])
     @eval begin
         function Base.$f(V::AlgebraicSet, args...)
             computeelements!(V)

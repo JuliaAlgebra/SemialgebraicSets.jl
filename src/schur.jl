@@ -69,7 +69,9 @@ end
 function conditionnumber(sf::Schur, I)
     n = length(sf.values)
     select = zeros(BlasInt, n)
-    select[I] = 1
+    for i in I
+        select[i] = 1
+    end
     _trsen!('E', 'N', select, copy(sf.T), copy(sf.Z))[4]
 end
 
@@ -78,21 +80,21 @@ end
 function clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     if isempty(M)
         # See bug JuliaLang/julia#...
-        return Matrix{float(eltype(M))}(0, 0), Vector{Int}[]
+        return Matrix{float(eltype(M))}(undef, 0, 0), Vector{Int}[]
     else
         _clusterordschur(M, ɛ)
     end
 end
 function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     # M = Z * T * Z' and "values" gives the eigenvalues
-    if VERSION <= v"0.7-"
-        sf = schurfact(M)
-        Z = sf[:Z]
-        v = sf[:values]
-    else
+    if VERSION >= v"0.7-"
         sf = schur(M)
         Z = sf.Z
         v = sf.values
+    else
+        sf = schurfact(M)
+        Z = sf[:Z]
+        v = sf[:values]
     end
     # documentation says that the error on the eigenvalues is ɛ * norm(T) / conditionnumber
     nT = norm(sf.T)
