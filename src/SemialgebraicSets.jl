@@ -3,6 +3,7 @@ __precompile__()
 module SemialgebraicSets
 
 using Compat
+using Compat.Random
 
 using MultivariatePolynomials
 const MP = MultivariatePolynomials

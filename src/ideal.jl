@@ -56,9 +56,9 @@ function monomialbasis(I, vars=variables(I))
         if d == maximum(exponents(m))
             # univariate monomial
             if iszero(d)
-                lv[:] = 0
+                lv[:] .= 0
             else
-                lv[indmax(exponents(m))] = d
+                lv[argmax(exponents(m))] = d
             end
         end
     end
