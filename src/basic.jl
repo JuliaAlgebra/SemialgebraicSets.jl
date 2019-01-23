@@ -1,7 +1,7 @@
 export inequalities, basicsemialgebraicset
 
-struct BasicSemialgebraicSet{T, PT<:APL{T}} <: AbstractBasicSemialgebraicSet
-    V::AlgebraicSet{T, PT}
+struct BasicSemialgebraicSet{T, PT<:APL{T}, AT <: AlgebraicSet{T, PT}} <: AbstractBasicSemialgebraicSet
+    V::AT
     p::Vector{PT}
 end
 function BasicSemialgebraicSet{T, PT}() where {T, PT<:APL{T}}
