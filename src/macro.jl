@@ -1,5 +1,38 @@
 export @set
 
+struct PolynomialInequality{PT<:AbstractPolynomialLike}
+    p::PT
+end
+function Base.intersect(ineq::PolynomialInequality; kws...)
+    return BasicSemialgebraicSet(FullSpace(), [ineq.p])
+end
+
+struct PolynomialEquality{PT<:AbstractPolynomialLike}
+    p::PT
+end
+function equality(lhs, rhs)
+    return PolynomialEquality(lhs - rhs)
+end
+function Base.intersect(eq::PolynomialEquality; lib_or_solver=nothing)
+    if lib_or_solver === nothing
+        return algebraicset([eq.p])
+    else
+        return algebraicset([eq.p], lib_or_solver)
+    end
+end
+
+const Element = Union{PolynomialInequality, PolynomialEquality, FixedVariable}
+
+function Base.intersect(el::Element,
+                        args...; kws...)
+    return intersect(intersect(el; kws...), args...; kws...)
+end
+
+function Base.intersect(set::AbstractBasicSemialgebraicSet,
+                        el::Element, args...; kws...)
+    return intersect(set, intersect(el; kws...), args...; kws...)
+end
+
 # Taken from JuMP/macros.jl
 function _canonicalize_sense(sns::Symbol, _error)
     if sns == :(==)
@@ -19,80 +52,37 @@ function _canonicalize_sense(sns::Symbol, _error)
     end
 end
 
-function appendconstraints!(domains, domaineqs, domainineqs, expr, _error)
+function appendconstraints!(elements, expr, _error)
     if Base.Meta.isexpr(expr, :call)
         try
             sense, vectorized = _canonicalize_sense(expr.args[1], _error)
             @assert !vectorized
             if sense == :(>=)
-                push!(domainineqs, esc(:($(expr.args[2]) - $(expr.args[3]))))
+                push!(elements, esc(:(SemialgebraicSets.PolynomialInequality($(expr.args[2]) - $(expr.args[3])))))
             elseif sense == :(<=)
-                push!(domainineqs, esc(:($(expr.args[3]) - $(expr.args[2]))))
+                push!(elements, esc(:(SemialgebraicSets.PolynomialInequality($(expr.args[3]) - $(expr.args[2])))))
             elseif sense == :(==)
-                push!(domaineqs, esc(:($(expr.args[2]) - $(expr.args[3]))))
+                push!(elements, esc(:(SemialgebraicSets.equality($(expr.args[2]), $(expr.args[3])))))
             else
                 _error("Unrecognized sense $(string(sense)) in domain specification")
             end
         catch
-            push!(domains, esc(expr))
+            push!(elements, esc(expr))
         end
     elseif Base.Meta.isexpr(expr, :&&)
-        map(t -> appendconstraints!(domains, domaineqs, domainineqs, t, _error), expr.args)
+        map(t -> appendconstraints!(elements, t, _error), expr.args)
     else
-        push!(domains, esc(expr))
+        push!(elements, esc(expr))
     end
-    nothing
+    return nothing
 end
 
-function builddomain(domains, domaineqs, domainineqs, library...)
-    domainaffs = gensym()
-
-    PT = gensym()
-    T = gensym()
-    if isempty(domaineqs) && isempty(domainineqs)
-        if isempty(domains)
-            code = :( $domainaffs = FullSpace() )
-        elseif length(domains) == 1
-            code = :( $domainaffs = $(domains[1]) )
-        else
-            code = :( $domainaffs = intersect($(domains...)) )
-        end
+macro set(expr, library=nothing)
+    elements = []
+    appendconstraints!(elements, expr, msg -> error("In @set($expr: ", msg))
+    if library === nothing
+        return :( intersect($(elements...)) )
     else
-        eqs = gensym()
-        ineqs = gensym()
-        code = quote
-            $eqs = tuple($(domaineqs...))
-            $ineqs = tuple($(domainineqs...))
-            $PT = Base.promote_typeof($eqs..., $ineqs...)
-            $T = coefficienttype($PT)
-        end
-
-        lin = gensym()
-        code = :( $code; $lin = algebraicset($PT[$eqs...], $(esc.(library)...)) )
-        basic = gensym()
-        if isempty(domainineqs)
-            code = :( $code; $basic = $lin )
-        else
-            code = :( $code; $basic = basicsemialgebraicset($lin, $PT[$ineqs...]) )
-        end
-
-        if !isempty(domains)
-            code = :( $code; $domainaffs = intersect($basic, $(domains...)) )
-        else
-            code = :( $code; $domainaffs = $basic )
-        end
-    end
-    domainaffs, code
-end
-
-macro set(expr, library...)
-    domains = []
-    domaineqs = []
-    domainineqs = []
-    appendconstraints!(domains, domaineqs, domainineqs, expr, msg -> error("In @set($expr: ", msg))
-    domainvar, domaincode = builddomain(domains, domaineqs, domainineqs, library...)
-    quote
-        $domaincode
-        $domainvar
+        return :( intersect($(elements...); lib_or_solver=$(esc(library))) )
     end
 end

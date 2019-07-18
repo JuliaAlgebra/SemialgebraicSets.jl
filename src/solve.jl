@@ -92,11 +92,11 @@ include("schur.jl")
 """
 Corless, R. M.; Gianni, P. M. & Trager, B. M. A reordered Schur factorization method for zero-dimensional polynomial systems with multiple roots Proceedings of the 1997 international symposium on Symbolic and algebraic computation, 1997, 133-140
 """
-struct ReorderedSchurMultiplicationMatricesSolver{T, RNGT <: Compat.Random.AbstractRNG} <: AbstractMultiplicationMatricesSolver
+struct ReorderedSchurMultiplicationMatricesSolver{T, RNGT <: Random.AbstractRNG} <: AbstractMultiplicationMatricesSolver
     ɛ::T
     rng::RNGT
 end
-ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, Compat.Random.GLOBAL_RNG)
+ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, Random.GLOBAL_RNG)
 ReorderedSchurMultiplicationMatricesSolver{T}() where T = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(real(T)))
 
 function solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, solver::ReorderedSchurMultiplicationMatricesSolver) where T
