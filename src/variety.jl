@@ -41,6 +41,9 @@ equalities(V::AlgebraicSet) = V.I.p
 addequality!(V::AlgebraicSet, p) = push!(V.I.p, p)
 Base.intersect(S::AlgebraicSet, T::AlgebraicSet) = AlgebraicSet(S.I + T.I, S.solver)
 
+function algebraicset(set::AbstractAlgebraicSet, solver...)
+    return algebraicset(equalities(set), solver...)
+end
 function Base.show(io::IO, V::AbstractAlgebraicSet)
     print(io, "Algebraic Set defined by ")
     n = nequalities(V)

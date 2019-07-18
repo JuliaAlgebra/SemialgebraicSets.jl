@@ -7,7 +7,7 @@
 # Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
 # Graphical Models and Image Processing, Elsevier, 1995, 57, 81-100
 
-using Compat.LinearAlgebra # for I
+using LinearAlgebra # for I
 @testset "Section 4.1 MD95" begin
     η = 1e-10
     A = [zeros(10, 1) Matrix(I, 10, 10); zeros(1, 10) 0.5]
@@ -34,7 +34,7 @@ function testelements(X, Y; atol=Base.rtoldefault(Float64), kwargs...)
 end
 
 # We use a fixed RNG in the tests to decrease nondeterminism. There is still nondeterminism in LAPACK though
-using Compat.Random
+using Random
 solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), MersenneTwister(0))
 
 @testset "Zero-dimensional ideal" begin

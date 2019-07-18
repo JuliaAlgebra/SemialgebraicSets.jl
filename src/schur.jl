@@ -1,7 +1,7 @@
-import Compat.LinearAlgebra: Schur, BlasInt, checksquare, chkstride1
-import Compat.LinearAlgebra.LAPACK: liblapack, chklapackerror, @blasfunc
+import LinearAlgebra: Schur, BlasInt, checksquare, chkstride1
+import LinearAlgebra.LAPACK: liblapack, chklapackerror, @blasfunc
 
-using Compat.LinearAlgebra
+using LinearAlgebra
 
 if VERSION <= v"0.7-"
     # Taken from JuliaLang/julia/base/linalg/lapack.jl and fixed for compq == 'E'

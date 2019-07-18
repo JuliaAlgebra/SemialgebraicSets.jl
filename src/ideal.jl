@@ -1,11 +1,8 @@
-import Base: +
-
 export monomialbasis, ideal
 
 abstract type AbstractPolynomialIdeal end
 
-struct EmptyPolynomialIdeal
-end
+struct EmptyPolynomialIdeal <: AbstractPolynomialIdeal end
 ideal(p::FullSpace, algo=defaultgröbnerbasisalgorithm(p)) = EmptyPolynomialIdeal()
 Base.rem(p::AbstractPolynomialLike, I::EmptyPolynomialIdeal) = p
 
@@ -27,7 +24,7 @@ end
 
 ideal(p, algo=defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
 
-(+)(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p], I.algo)
+Base.:+(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p], I.algo)
 
 MP.variables(I::PolynomialIdeal) = variables(I.p)
 
