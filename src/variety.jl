@@ -44,6 +44,7 @@ projectivealgebraicset(p::Vector, solver) = projectivealgebraicset(p, defaultgrÃ
 
 ideal(V::AlgebraicSet) = V.I
 
+MP.variables(V::AlgebraicSet) = MP.variables(V.I)
 nequalities(V::AlgebraicSet) = length(V.I.p)
 equalities(V::AlgebraicSet) = V.I.p
 addequality!(V::AlgebraicSet, p) = push!(V.I.p, p)
@@ -53,18 +54,24 @@ function algebraicset(set::AbstractAlgebraicSet, solver...)
     return algebraicset(equalities(set), solver...)
 end
 function Base.show(io::IO, V::AbstractAlgebraicSet)
-    print(io, "Algebraic Set defined by ")
-    n = nequalities(V)
+    print(io, "{ (", join(variables(V), ", "), ") | ",
+          join(string.(equalities(V)) .* " = 0", ", "), " }")
+end
+function _show_els(io::IO, name, n, els, sign)
     if n == 0
-        println(io, "no equality")
+        println(io, "no $(name)y")
     elseif n == 1
-        println(io, "1 equality")
+        println(io, "1 $(name)ty")
     else
-        println(io, "$n equalities")
+        println(io, "$n $(name)ies")
     end
-    for p in equalities(V)
-        println(io, " $p == 0")
+    for p in els
+        println(io, " $p $sign 0")
     end
+end
+function Base.show(io::IO, mime::MIME"text/plain", V::AbstractAlgebraicSet)
+    print(io, "Algebraic Set defined by ")
+    _show_els(io, "equalit", nequalities(V), equalities(V), "=")
 end
 
 defaultalgebraicsolver(V::AlgebraicSet) = V.solver
@@ -103,7 +110,7 @@ end
 
 Base.eltype(V::AlgebraicSet{T}) where T = Vector{T}
 
-for f in ((VERSION >= v"0.7-") ? [:length, :iterate, :lastindex, :getindex] : [:length, :start, :endof, :next, :done, :getindex])
+for f in [:length, :iterate, :lastindex, :getindex]
     @eval begin
         function Base.$f(V::AlgebraicSet, args...)
             computeelements!(V)

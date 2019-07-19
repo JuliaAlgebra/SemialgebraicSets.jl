@@ -14,6 +14,13 @@ function Base.convert(::Type{FixedVariablesIdeal{V, T, MT}}, ideal::FixedVariabl
     return FixedVariablesIdeal{V, T, MT}(subs)
 end
 
+function MP.variables(ideal::FixedVariablesIdeal{V}) where V
+    if generate_nonzero_constant(ideal)
+        return V[]
+    else
+        return sort(collect(keys(ideal.substitutions)), rev=true)
+    end
+end
 # In that case, the ideal can generate any polynomial.
 function generate_nonzero_constant(I::FixedVariablesIdeal)
     return I.substitutions === nothing
@@ -39,6 +46,7 @@ function Base.convert(::Type{FixedVariablesSet{V, T, MT}}, set::FixedVariablesSe
 end
 
 ideal(set::FixedVariablesSet, args...) = set.ideal
+MP.variables(set::FixedVariablesSet) = MP.variables(set.ideal)
 function nequalities(set::FixedVariablesSet)
     if set.ideal.substitutions === nothing
         return 1

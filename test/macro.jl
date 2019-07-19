@@ -12,7 +12,11 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
         addinequality!(S, x + y - 1)
         # Algebraic set forces `Float64`
         @test S isa BasicSemialgebraicSet{Float64}
+        @test sprint(show, S) == "{ (x, y) | x - y = 0, x^2 - y = 0, x^2*y - 1.0 ≥ 0, x + y - 1.0 ≥ 0 }"
+        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n2 inequalities\n x^2*y - 1.0 ≥ 0\n x + y - 1.0 ≥ 0\n"
         @test S.V isa AlgebraicSet{Float64}
+        @test sprint(show, S.V) == "{ (x, y) | x - y = 0, x^2 - y = 0 }"
+        @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n"
         @test S === MultivariatePolynomials.changecoefficienttype(S, Float64)
         @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Float64)
         @test S.V.I === convert(typeof(S.V.I), S.V.I)
@@ -37,17 +41,46 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
         S4 = @set S && T
         @test S4.p == [S.p; inequalities(T)]
         @test equalities(S4) == [S.V.I.p; T.V.I.p]
+
+        @testset "Different variables" begin
+            T = (@set x == x^2 && y <= y^2)
+            @test sprint(show, T) == "{ (x, y) | -x^2 + x = 0, y^2 - y ≥ 0 }"
+            @test sprint(show, MIME"text/plain"(), T) == "Basic semialgebraic Set defined by 1 equalitty\n -x^2 + x = 0\n1 inequalitty\n y^2 - y ≥ 0\n"
+        end
     end
     @testset "Basic with no equality" begin
         S = @set x + y ≥ 1 && x ≤ y
+        @test sprint(show, S) == "{ (x, y) | x + y - 1 ≥ 0, -x + y ≥ 0 }"
+        @test sprint(show, MIME"text/plain"(), S) == """
+Basic semialgebraic Set defined by no equality
+2 inequalities
+ x + y - 1 ≥ 0
+ -x + y ≥ 0
+"""
+        @test sprint(show, S.V) == "R^n"
+        @test sprint(show, MIME"text/plain"(), S.V) == """
+Algebraic Set defined by no equality
+"""
         @test S isa BasicSemialgebraicSet{Int}
         @test S === MultivariatePolynomials.changecoefficienttype(S, Int)
         @test S.V isa FullSpace
         Sf = MultivariatePolynomials.changecoefficienttype(S, Float64)
         @test Sf isa BasicSemialgebraicSet{Float64}
         @test Sf.V isa FullSpace
+
+        @test S ∩ FullSpace() === S
+        @test S.V ∩ FullSpace() === S.V
+        @test FullSpace() ∩ S  === S
+        @test FullSpace() ∩ S.V  === S.V
+        @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Float64)
     end
     @testset "Basic with fixed variables" begin
+        S = @set x == 1 && x ≤ x^2
+        @test sprint(show, S) == "{ (x) | x - 1 = 0, x^2 - x ≥ 0 }"
+        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 1 equalitty\n x - 1 = 0\n1 inequalitty\n x^2 - x ≥ 0\n"
+        @test sprint(show, S.V) == "{ (x) | x - 1 = 0 }"
+        @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 1 equalitty\n x - 1 = 0\n"
+
         S = @set x == 1 && x ≤ y && 2 == y
         @test S isa BasicSemialgebraicSet{Int}
         @test S.V isa FixedVariablesSet{<:AbstractVariable, Int}
