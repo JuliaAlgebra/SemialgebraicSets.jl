@@ -1,9 +1,9 @@
 # SemialgebraicSets
 
-| **PackageEvaluator** | **Build Status** |
-|:--------------------:|:----------------:|
-| [![][pkg-0.6-img]][pkg-0.6-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] |
-| [![][pkg-0.7-img]][pkg-0.7-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
+| **Build Status** |
+|:----------------:|
+| [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] |
+| [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
 
 Extension of MultivariatePolynomials to semialgebraic sets, i.e. sets defined by inequalities and equalities between polynomials.
 The following example shows how to build an [algebraic set/algebraic variety](https://en.wikipedia.org/wiki/Algebraic_variety)
@@ -36,11 +36,6 @@ using TypedPolynomials
 @set y^2 == x^3 - x && x <= 0
 @set y^2 == x^3 - x && x >= 1
 ```
-
-[pkg-0.6-img]: http://pkg.julialang.org/badges/SemialgebraicSets_0.6.svg
-[pkg-0.6-url]: http://pkg.julialang.org/?pkg=SemialgebraicSets
-[pkg-0.7-img]: http://pkg.julialang.org/badges/SemialgebraicSets_0.7.svg
-[pkg-0.7-url]: http://pkg.julialang.org/?pkg=SemialgebraicSets
 
 [build-img]: https://travis-ci.org/JuliaAlgebra/SemialgebraicSets.jl.svg?branch=master
 [build-url]: https://travis-ci.org/JuliaAlgebra/SemialgebraicSets.jl
