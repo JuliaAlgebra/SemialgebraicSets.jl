@@ -28,11 +28,30 @@ function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemial
     return BasicSemialgebraicSet{T, PT, AT}(set.V, set.p)
 end
 
+MP.variables(S::BasicSemialgebraicSet{T, PT, FullSpace}) where {T, PT<:APL{T}} = MP.variables(S.p)
+MP.variables(S::BasicSemialgebraicSet) = sort(union(MP.variables(S.V), MP.variables(S.p)), rev=true)
+nequalities(S::BasicSemialgebraicSet) = nequalities(S.V)
 equalities(S::BasicSemialgebraicSet) = equalities(S.V)
 addequality!(S::BasicSemialgebraicSet, p) = addequality!(S.V, p)
+ninequalities(S::BasicSemialgebraicSet) = length(S.p)
 inequalities(S::BasicSemialgebraicSet) = S.p
 addinequality!(S::BasicSemialgebraicSet, p) = push!(S.p, p)
 
 Base.intersect(S::BasicSemialgebraicSet, T::BasicSemialgebraicSet) = BasicSemialgebraicSet(S.V ∩ T.V, [S.p; T.p])
 Base.intersect(S::BasicSemialgebraicSet, T::AbstractAlgebraicSet) = BasicSemialgebraicSet(S.V ∩ T, copy(S.p))
+Base.intersect(S::BasicSemialgebraicSet, ::FullSpace) = S
 Base.intersect(T::AbstractAlgebraicSet, S::BasicSemialgebraicSet) = intersect(S, T)
+
+function Base.show(io::IO, V::BasicSemialgebraicSet)
+    print(io, "{ (", join(variables(V), ", "), ") | ",
+          join(string.(equalities(V)) .* " = 0", ", "))
+    if nequalities(V) > 0
+        print(io, ", ")
+    end
+    print(io, join(string.(inequalities(V)) .* " ≥ 0", ", "), " }")
+end
+function Base.show(io::IO, mime::MIME"text/plain", V::BasicSemialgebraicSet)
+    print(io, "Basic semialgebraic Set defined by ")
+    _show_els(io, "equalit", nequalities(V), equalities(V), "=")
+    _show_els(io, "inequalit", ninequalities(V), inequalities(V), "≥")
+end
