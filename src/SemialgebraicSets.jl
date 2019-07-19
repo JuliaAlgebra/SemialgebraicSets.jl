@@ -23,6 +23,11 @@ end
 function Base.show(io::IO, ::FullSpace)
     print(io, "R^n")
 end
+MP.changecoefficienttype(S::Type{FullSpace}, T::Type) = S
+
+function MP.changecoefficienttype(set::AbstractSemialgebraicSet, T::Type)
+    return convert(MP.changecoefficienttype(typeof(set), T), set)
+end
 
 Base.intersect(S::FullSpace, T::AbstractSemialgebraicSet) = T
 Base.intersect(S::AbstractSemialgebraicSet, T::FullSpace) = S

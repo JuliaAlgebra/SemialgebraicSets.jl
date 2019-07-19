@@ -22,6 +22,14 @@ function PolynomialIdeal{T, PT}() where {T, PT<:APL{T}}
     PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(PT))
 end
 
+function Base.convert(::Type{PolynomialIdeal{T, PT, A}}, I::PolynomialIdeal{T, PT, A}) where {T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm}
+    return I
+end
+function Base.convert(::Type{PolynomialIdeal{T, PT, A}}, I::PolynomialIdeal) where {T, PT, A}
+    return PolynomialIdeal{T, PT, A}(I.p, I.gröbnerbasis, I.algo)
+end
+
+
 ideal(p, algo=defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
 
 Base.:+(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p], I.algo)
