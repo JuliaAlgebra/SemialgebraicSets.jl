@@ -21,6 +21,14 @@ AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = Alge
 AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
 AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = AlgebraicSet(ideal(p, algo), solver)
 
+MP.changecoefficienttype(::Type{AlgebraicSet{U, PU, A, S}}, T::Type) where {U, PU, A, S} = AlgebraicSet{T, MP.changecoefficienttype(PU, T), A, S}
+function Base.convert(::Type{AlgebraicSet{T, PT, A, S}}, set::AlgebraicSet{T, PT, A, S}) where {T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver}
+    return set
+end
+function Base.convert(::Type{AlgebraicSet{T, PT, A, S}}, set::AlgebraicSet) where {T, PT, A, S}
+    return AlgebraicSet{T, PT, A, S}(set.I, set.projective, set.elements, set.elementscomputed, set.iszerodimensional, set.solver)
+end
+
 algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = AlgebraicSet(p, defaultgröbnerbasisalgorithm(p), lib.solver)
 algebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p)) = AlgebraicSet(p, algo, lib.solver)
 algebraicset(p::Vector, solver) = algebraicset(p, defaultalgebraicsetlibrary(p, solver))

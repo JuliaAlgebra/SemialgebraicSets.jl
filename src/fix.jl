@@ -3,6 +3,17 @@ export FixedVariablesSet
 struct FixedVariablesIdeal{V<:AbstractVariable, T<:Number, MT<:AbstractMonomialLike} <: AbstractPolynomialIdeal
     substitutions::Union{Nothing, Dict{V, T}}
 end
+function Base.convert(::Type{FixedVariablesIdeal{V, T, MT}}, ideal::FixedVariablesIdeal{V, T, MT}) where {V<:AbstractVariable, T<:Number, MT<:AbstractMonomialLike}
+    return ideal
+end
+function Base.convert(::Type{FixedVariablesIdeal{V, T, MT}}, ideal::FixedVariablesIdeal{V, S, MT}) where {V, S, T, MT}
+    subs = ideal.substitutions
+    if subs !== nothing
+        subs = convert(Dict{V, T}, subs)
+    end
+    return FixedVariablesIdeal{V, T, MT}(subs)
+end
+
 # In that case, the ideal can generate any polynomial.
 function generate_nonzero_constant(I::FixedVariablesIdeal)
     return I.substitutions === nothing
@@ -19,6 +30,14 @@ end
 struct FixedVariablesSet{V, T, MT} <: AbstractAlgebraicSet
     ideal::FixedVariablesIdeal{V, T, MT}
 end
+MP.changecoefficienttype(::Type{FixedVariablesSet{V, S, MT}}, T::Type) where {V, S, MT} = FixedVariablesSet{V, T, MT}
+function Base.convert(::Type{FixedVariablesSet{V, T, MT}}, set::FixedVariablesSet{V, T, MT}) where {V, T, MT}
+    return set
+end
+function Base.convert(::Type{FixedVariablesSet{V, T, MT}}, set::FixedVariablesSet{V, S, MT}) where {V, S, T, MT}
+    return FixedVariablesSet(convert(FixedVariablesIdeal{V, T, MT}, set.ideal))
+end
+
 ideal(set::FixedVariablesSet, args...) = set.ideal
 function nequalities(set::FixedVariablesSet)
     if set.ideal.substitutions === nothing
