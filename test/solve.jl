@@ -139,7 +139,7 @@ end
     iszd, B = monomialbasis(V.I)
     @test iszd
     @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
-    testelementstypes(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
+    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
 end
 
 #@testset "Example 4.4 of MD95 and 5.3 of CGT97" begin
