@@ -81,7 +81,7 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     testelementstypes(V, [[4, 2], [4, -2]])
     V = @set x^2 + x == 6 && y == x+1 solver
     @test iszerodimensional(V)
-    testelementstypes(V, [[2, 3], [-3, -2]])
+    testelements(V, [[2, 3], [-3, -2]])
     V = @set x^2 + x == 6 && y^2 == x solver
     @test iszerodimensional(V)
     testelementstypes(V, [[2, √2], [2, -√2]])
