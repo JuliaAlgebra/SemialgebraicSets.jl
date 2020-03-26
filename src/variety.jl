@@ -8,7 +8,7 @@ end
 defaultalgebraicsetlibrary(::Vector{<:APL}, solver::AbstractAlgebraicSolver) = DefaultAlgebraicSetLibrary(solver)
 defaultalgebraicsetlibrary(p::Vector{<:APL}, solveroralgo...) = defaultalgebraicsetlibrary(p, defaultalgebraicsolver(p, solveroralgo...))
 
-mutable struct AlgebraicSet{T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver} <: AbstractAlgebraicSet
+mutable struct AlgebraicSet{T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver, U} <: AbstractAlgebraicSet
     I::PolynomialIdeal{T, PT, A}
     projective::Bool
     elements::Vector{Vector{T}}
@@ -16,17 +16,17 @@ mutable struct AlgebraicSet{T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver} <: Abs
     iszerodimensional::Bool
     solver::S
 end
-AlgebraicSet{T, PT, A, S}(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = AlgebraicSet{T, PT, A, S}(I, false, Vector{T}[], false, false, solver)
-AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = AlgebraicSet{T, PT, A, S}(I, solver)
-AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
+AlgebraicSet{T, PT, A, S, U}(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S, U} = AlgebraicSet{T, PT, A, S, U}(I, false, Vector{U}[], false, false, solver)
+AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = AlgebraicSet{T, PT, A, S, float(T)}(I, solver)
+AlgebraicSet{T, PT}() where {T, U, S, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
 AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = AlgebraicSet(ideal(p, algo), solver)
 
-MP.changecoefficienttype(::Type{AlgebraicSet{U, PU, A, S}}, T::Type) where {U, PU, A, S} = AlgebraicSet{T, MP.changecoefficienttype(PU, T), A, S}
-function Base.convert(::Type{AlgebraicSet{T, PT, A, S}}, set::AlgebraicSet{T, PT, A, S}) where {T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver}
+MP.changecoefficienttype(::Type{AlgebraicSet{U, PU, A, S, UU}}, T::Type) where {U, PU, A, S, UU} = AlgebraicSet{T, MP.changecoefficienttype(PU, T), A, S, float(T)}
+function Base.convert(::Type{AlgebraicSet{T, PT, A, S, U}}, set::AlgebraicSet{T, PT, A, S, U}) where {T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver, U}
     return set
 end
-function Base.convert(::Type{AlgebraicSet{T, PT, A, S}}, set::AlgebraicSet) where {T, PT, A, S}
-    return AlgebraicSet{T, PT, A, S}(set.I, set.projective, set.elements, set.elementscomputed, set.iszerodimensional, set.solver)
+function Base.convert(::Type{AlgebraicSet{T, PT, A, S, U}}, set::AlgebraicSet) where {T, PT, A, S, U}
+    return AlgebraicSet{T, PT, A, S, U}(set.I, set.projective, set.elements, set.elementscomputed, set.iszerodimensional, set.solver)
 end
 
 algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = AlgebraicSet(p, defaultgröbnerbasisalgorithm(p), lib.solver)
@@ -75,10 +75,10 @@ function Base.show(io::IO, mime::MIME"text/plain", V::AbstractAlgebraicSet)
 end
 
 defaultalgebraicsolver(V::AlgebraicSet) = V.solver
-function elements(V::AlgebraicSet{T}) where T
+function elements(V::AlgebraicSet{T, PT, A, S, U}) where {T, PT, A, S, U}
     if V.projective
         I = V.I
-        els = Vector{T}[]
+        els = Vector{U}[]
         for v in variables(I)
             I1 = I + ideal([v - 1], V.I.algo)
             els1 = elements(AlgebraicSet(I1, V.solver))
@@ -108,7 +108,7 @@ function iszerodimensional(V::AlgebraicSet)
     V.iszerodimensional
 end
 
-Base.eltype(V::AlgebraicSet{T}) where T = Vector{T}
+Base.eltype(V::AlgebraicSet{T, PT, A, S, U}) where {T, PT, A, S, U} = Vector{U}
 
 for f in [:length, :iterate, :lastindex, :getindex]
     @eval begin

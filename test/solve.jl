@@ -32,6 +32,20 @@ function testelements(X, Y; atol=Base.rtoldefault(Float64), kwargs...)
         @test any(x -> isapprox(x, y; atol=atol, kwargs...), X)
     end
 end
+function testelementstypes(X, Y; kwargs...)
+    testelements(X, Y; kwargs...)
+    for T in [Rational{Int}, Float64]
+        if X isa FixedVariablesSet
+            U = T
+        else
+            U = float(T)
+        end
+        V = MultivariatePolynomials.changecoefficienttype(X, T)
+        testelements(V, Y; kwargs...)
+        @test eltype(V) == Vector{U}
+        @test collect(V) isa Vector{Vector{U}}
+    end
+end
 
 # We use a fixed RNG in the tests to decrease nondeterminism. There is still nondeterminism in LAPACK though
 using Random
@@ -50,48 +64,48 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     V = @set 4x^2 == -5x && 3x^3 == 0 solver
     @test V.solver.solver === solver
     @test iszerodimensional(V)
-    testelements(V, [[0]])
+    testelementstypes(V, [[0]])
     V = @set y == x^2 && z == x^3 solver
     @test !iszerodimensional(V)
     V = @set x^3 == 2x*y &&  x^2*y == 2y^2 + x solver
     @test iszerodimensional(V)
-    testelements(V, [[0, 0]])
+    testelementstypes(V, [[0, 0]])
     V = @set x == 1 solver
     @test iszerodimensional(V)
-    testelements(V, [[1]])
+    testelementstypes(V, [[1]])
     V = @set x == 1 && y == 2 solver
     @test iszerodimensional(V)
-    testelements(V, [[1, 2]])
+    testelementstypes(V, [[1, 2]])
     V = @set x == 4 && y^2 == x solver
     @test iszerodimensional(V)
-    testelements(V, [[4, 2], [4, -2]])
+    testelementstypes(V, [[4, 2], [4, -2]])
     V = @set x^2 + x == 6 && y == x+1 solver
     @test iszerodimensional(V)
-    testelements(V, [[2, 3], [-3, -2]])
+    testelementstypes(V, [[2, 3], [-3, -2]])
     V = @set x^2 + x == 6 && y^2 == x solver
     @test iszerodimensional(V)
-    testelements(V, [[2, √2], [2, -√2]])
+    testelementstypes(V, [[2, √2], [2, -√2]])
 end
 
 @testset "Projective zero-dimensional ideal" begin
     Mod.@polyvar x y z
     V = projectivealgebraicset([x - y], solver)
     @test iszerodimensional(V)
-    testelements(V, [[1, 1]])
+    testelementstypes(V, [[1, 1]])
     V = @set x + y == z solver
     V.projective = true
     @test !iszerodimensional(V)
     V = @set y == 2x solver
     V.projective = true
     @test iszerodimensional(V)
-    testelements(V, [[1, 2]])
+    testelementstypes(V, [[1, 2]])
     V = @set x + y == y solver
     V.projective = true
     @test iszerodimensional(V)
-    testelements(V, [[0, 1]])
+    testelementstypes(V, [[0, 1]])
     V = projectivealgebraicset([x + y - x])
     @test iszerodimensional(V)
-    testelements(V, [[1, 0]])
+    testelementstypes(V, [[1, 0]])
 end
 
 @testset "Example 5.1 of CGT97" begin
@@ -115,7 +129,7 @@ end
     # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
     # the second and third do not seem that close but when the three first are averaged it is very close to zero.
     @test iszerodimensional(V)
-    testelements(V, [[0.66209555, 0.935259169], [0.66209555, -0.935259169], [0.0516329456, -0.025825086], [0.0516329456, 0.025825086], [0, 0]])
+    testelementstypes(V, [[0.66209555, 0.935259169], [0.66209555, -0.935259169], [0.0516329456, -0.025825086], [0.0516329456, 0.025825086], [0, 0]])
 end
 
 @testset "Example 5.2 of CGT97" begin
@@ -125,7 +139,7 @@ end
     iszd, B = monomialbasis(V.I)
     @test iszd
     @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
-    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
+    testelementstypes(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
 end
 
 #@testset "Example 4.4 of MD95 and 5.3 of CGT97" begin

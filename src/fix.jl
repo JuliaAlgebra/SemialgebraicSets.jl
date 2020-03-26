@@ -107,6 +107,7 @@ function only_point(V::FixedVariablesSet)
     return [sub[2] for sub in subs]
 end
 
+Base.eltype(::FixedVariablesSet{V, T}) where {V, T} = Vector{T}
 function Base.iterate(V::FixedVariablesSet, state=nothing)
     if state === nothing && !isempty(V)
         return only_point(V), true

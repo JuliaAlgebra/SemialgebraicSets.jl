@@ -1,7 +1,7 @@
 name = "SemialgebraicSets"
 uuid = "8e049039-38e8-557d-ae3a-bc521ccf6204"
 repo = "https://github.com/JuliaAlgebra/SemialgebraicSets.jl.git"
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
