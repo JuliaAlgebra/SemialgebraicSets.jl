@@ -84,7 +84,7 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     testelements(V, [[2, 3], [-3, -2]])
     V = @set x^2 + x == 6 && y^2 == x solver
     @test iszerodimensional(V)
-    testelementstypes(V, [[2, √2], [2, -√2]])
+    testelements(V, [[2, √2], [2, -√2]])
 end
 
 @testset "Projective zero-dimensional ideal" begin
