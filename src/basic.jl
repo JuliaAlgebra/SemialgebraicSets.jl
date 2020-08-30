@@ -16,17 +16,9 @@ function BasicSemialgebraicSet(V::AlgebraicSet{T, PT, A, ST}, p::Vector{PS}) whe
     BasicSemialgebraicSet(convert(AlgebraicSet{U, PU, A, ST}, V), Vector{PU}(p))
 end
 #BasicSemialgebraicSet{T, PT<:APL{T}}(V::AlgebraicSet{T, PT}, p::Vector{PT}) = BasicSemialgebraicSet{T, PT}(V, p)
-function basicsemialgebraicset(V, p)
-    BasicSemialgebraicSet(V, p)
-end
 
 MP.changecoefficienttype(::Type{BasicSemialgebraicSet{S, PS, AT}}, T::Type) where {S, PS, AT} = BasicSemialgebraicSet{T, MP.changecoefficienttype(PS, T), MP.changecoefficienttype(AT, T)}
-function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemialgebraicSet{T, PT, AT}) where {T, PT<:APL, AT<:AbstractAlgebraicSet}
-    return set
-end
-function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemialgebraicSet{T, PT, AT}) where {T, PT<:AbstractPolynomialLike{T}, AT<:AbstractAlgebraicSet}
-    return set
-end
+
 function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemialgebraicSet) where {T, PT, AT}
     return BasicSemialgebraicSet{T, PT, AT}(set.V, set.p)
 end
