@@ -21,9 +21,7 @@ function basicsemialgebraicset(V, p)
 end
 
 MP.changecoefficienttype(::Type{BasicSemialgebraicSet{S, PS, AT}}, T::Type) where {S, PS, AT} = BasicSemialgebraicSet{T, MP.changecoefficienttype(PS, T), MP.changecoefficienttype(AT, T)}
-function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemialgebraicSet{T, PT, AT}) where {T, PT<:APL, AT<:AbstractAlgebraicSet}
-    return set
-end
+
 function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemialgebraicSet) where {T, PT, AT}
     return BasicSemialgebraicSet{T, PT, AT}(set.V, set.p)
 end

@@ -12,6 +12,7 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
         addinequality!(S, x + y - 1)
         # Algebraic set forces `Float64`
         @test S isa BasicSemialgebraicSet{Float64}
+        @test S == basicsemialgebraicset(S.V, S.p)
         @test sprint(show, S) == "{ (x, y) | x - y = 0, x^2 - y = 0, x^2*y - 1.0 ≥ 0, x + y - 1.0 ≥ 0 }"
         @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n2 inequalities\n x^2*y - 1.0 ≥ 0\n x + y - 1.0 ≥ 0\n"
         @test S.V isa AlgebraicSet{Float64}
