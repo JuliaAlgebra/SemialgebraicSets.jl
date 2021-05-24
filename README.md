@@ -18,6 +18,8 @@ using TypedPolynomials
 @set x == z^2 && y == z^3
 ```
 
+## Solving systems of algebraic equations
+
 Once the algebraic set has been created, you can check whether it is zero-dimensional and if it is the case, you can get the finite number of elements of the set simply by iterating over it, or by using `collect` to transform it into an array containing the solutions.
 ```julia
 V = @set y == x^2 && z == x^3
@@ -25,6 +27,32 @@ iszerodimensional(V) # should return false
 V = @set x^2 + x == 6 && y == x+1
 iszerodimensional(V) # should return true
 collect(V) # should return [[2, 3], [-3, -2]]
+```
+The code sample above solves the system of algbraic equations by first
+computing a *Gröbner basis* for the system, then the multiplication matrices
+and then a Schur decomposition of a random combination of these matrices.
+Additionally, SemialgebraicSets defines an interface that can be implemented by
+other solvers for these systems.
+This allows for instance to solve the systems with
+[homotopy continuation](https://www.juliahomotopycontinuation.org/):
+```julia
+julia> using HomotopyContinuation
+
+julia> solver = SemialgebraicSetsHCSolver(; compile = false)
+SemialgebraicSetsHCSolver(; compile = false)
+
+julia> @polyvar x y
+(x, y)
+
+julia> V = @set x^2 + x == 6 && y == x+1 solver
+Algebraic Set defined by 2 equalities
+ x^2 + x - 6.0 = 0
+ -x + y - 1.0 = 0
+
+julia> collect(V)
+2-element Vector{Vector{Float64}}:
+ [2.0, 3.0]
+ [-3.0, -2.0]
 ```
 
 The following example shows how to build an [basic semialgebraic set](http://www.mit.edu/~parrilo/cdc03_workshop/10_positivstellensatz_2003_12_07_02_screen.pdf)
