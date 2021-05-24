@@ -32,6 +32,7 @@ end
 algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = AlgebraicSet(p, defaultgröbnerbasisalgorithm(p), lib.solver)
 algebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p)) = AlgebraicSet(p, algo, lib.solver)
 algebraicset(p::Vector, solver) = algebraicset(p, defaultalgebraicsetlibrary(p, solver))
+algebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = algebraicset(p, algo, defaultalgebraicsetlibrary(p, solver))
 
 projectivealgebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary) = projectivealgebraicset(p, defaultgröbnerbasisalgorithm(p), lib.solver)
 function projectivealgebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm=defaultgröbnerbasisalgorithm(p), lib::DefaultAlgebraicSetLibrary=defaultalgebraicsetlibrary(p))
