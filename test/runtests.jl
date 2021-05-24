@@ -1,7 +1,9 @@
-using SemialgebraicSets
 using Test
 
 using MultivariatePolynomials
+const MP = MultivariatePolynomials
+
+using SemialgebraicSets
 
 # Taken from JuMP/test/solvers.jl
 function try_import(name::Symbol)
