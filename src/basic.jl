@@ -10,10 +10,10 @@ end
 function BasicSemialgebraicSet(V::AlgebraicSet{T, PT, A, S}, p::Vector{PT}) where {T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver}
     BasicSemialgebraicSet{T, PT, typeof(V)}(V, p)
 end
-function BasicSemialgebraicSet(V::AlgebraicSet{T, PT, A, ST}, p::Vector{PS}) where {T, PT<:APL{T}, S, PS<:APL{S}, A, ST<:AbstractAlgebraicSolver}
-    U = promote_type(T, S)
-    PU = promote_type(PT, PS)
-    BasicSemialgebraicSet(convert(AlgebraicSet{U, PU, A, ST}, V), Vector{PU}(p))
+function BasicSemialgebraicSet(V::AlgebraicSet{T, PT, A, SO, U}, p::Vector{PS}) where {T, PT<:APL{T}, S, PS<:APL{S}, A, SO<:AbstractAlgebraicSolver, U}
+    ST = promote_type(T, S)
+    PST = promote_type(PT, PS)
+    BasicSemialgebraicSet(convert(AlgebraicSet{ST, PST, A, SO, U}, V), Vector{PST}(p))
 end
 #BasicSemialgebraicSet{T, PT<:APL{T}}(V::AlgebraicSet{T, PT}, p::Vector{PT}) = BasicSemialgebraicSet{T, PT}(V, p)
 function basicsemialgebraicset(V, p)
