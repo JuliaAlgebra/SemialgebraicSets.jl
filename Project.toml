@@ -12,7 +12,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 TypedPolynomials = "afbbf031-7a57-5f58-a1b9-b774a0fad08d"
 
 [compat]
-MultivariatePolynomials = "0.3, 0.4"
+MultivariatePolynomials = "0.4.2"
 julia = "1"
 
 [extras]
