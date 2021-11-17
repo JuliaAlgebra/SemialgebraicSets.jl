@@ -2,6 +2,9 @@ module SemialgebraicSets
 
 using Random
 
+import MutableArithmetics
+const MA = MutableArithmetics
+
 using MultivariatePolynomials
 const MP = MultivariatePolynomials
 

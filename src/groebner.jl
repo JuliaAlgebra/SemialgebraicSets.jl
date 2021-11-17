@@ -12,7 +12,15 @@ where ``m = \\mathrm{lcm}(\\mathrm{\\mathsc{LM}}(p), \\mathrm{\\mathsc{LM}}(q))`
 """
 function spolynomial(p::APL, q::APL)
     m = lcm(leadingmonomial(p), leadingmonomial(q))
-    MultivariatePolynomials._div(m, leadingterm(p)) * p - MultivariatePolynomials._div(m, leadingterm(q)) * q
+    ltp = leadingterm(p)
+    # `MA.operate` ensures that the returned value can be mutated without
+    # affecting either `a` or `p`.
+    a = MA.operate(*, MP._div(m, monomial(ltp)), p)
+    ad = MA.operate!!(/, a, MP.coefficient(ltp))
+    ltq = leadingterm(q)
+    b = MA.operate(*, MP._div(m, monomial(ltq)), q)
+    bd = MA.operate!!(/, b, MP.coefficient(ltq))
+    return MA.operate!!(-, ad, bd)
 end
 
 function reducebasis!(F::AbstractVector{<:APL}; kwargs...)
