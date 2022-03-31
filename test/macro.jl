@@ -4,24 +4,24 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
     Mod.@polyvar x y
     @test isa(FullSpace(), FullSpace)
     V = @set x * y == 1
-    @test V isa AlgebraicSet
+    @test V isa AlgebraicSet{Rational{BigInt}}
     @test_throws ArgumentError addinequality!(V, x*y)
     @testset "Basic" begin
         S = @set x - y == 0 && x^2*y >= 1
         addequality!(S, x^2 - y)
         addinequality!(S, x + y - 1)
-        # Algebraic set forces `Float64`
-        @test S isa BasicSemialgebraicSet{Float64}
+        # Algebraic set forces `Rational{BigInt}`
+        @test S isa BasicSemialgebraicSet{Rational{BigInt}}
         @test S == basicsemialgebraicset(S.V, S.p)
-        @test sprint(show, S) == "{ (x, y) | x - y = 0, x^2 - y = 0, x^2*y - 1.0 ≥ 0, x + y - 1.0 ≥ 0 }"
-        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n2 inequalities\n x^2*y - 1.0 ≥ 0\n x + y - 1.0 ≥ 0\n"
-        @test S.V isa AlgebraicSet{Float64}
+        @test sprint(show, S) == "{ (x, y) | x - y = 0, x^2 - y = 0, x^2*y - 1//1 ≥ 0, x + y - 1//1 ≥ 0 }"
+        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n2 inequalities\n x^2*y - 1//1 ≥ 0\n x + y - 1//1 ≥ 0\n"
+        @test S.V isa AlgebraicSet{Rational{BigInt}}
         @test sprint(show, S.V) == "{ (x, y) | x - y = 0, x^2 - y = 0 }"
         @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n"
-        @test S === MultivariatePolynomials.changecoefficienttype(S, Float64)
-        @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Float64)
+        @test S === MultivariatePolynomials.changecoefficienttype(S, Rational{BigInt})
+        @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Rational{BigInt})
         @test S.V.I === convert(typeof(S.V.I), S.V.I)
-        @test BasicSemialgebraicSet{Int, polynomialtype(x, Int)}() isa BasicSemialgebraicSet{Float64, polynomialtype(x, Float64)}
+        @test BasicSemialgebraicSet{Int, polynomialtype(x, Int)}() isa BasicSemialgebraicSet{Rational{BigInt}, polynomialtype(x, Rational{BigInt})}
         @test Int32(2)*x^2*y isa MultivariatePolynomials.AbstractTerm{Int32}
         Sf = MultivariatePolynomials.changecoefficienttype(S, Float32)
         @test Sf isa BasicSemialgebraicSet{Float32}
@@ -125,8 +125,8 @@ Algebraic Set defined by no equality
                   @set(x ≤ y && x == 1 && 2 + y == x),
                   @set(2 + y == x && x ≤ y && x == 1),
                   @set(2 + y == x && x ≤ y && x == 1)]
-            @test S isa BasicSemialgebraicSet{Float64}
-            @test S.V isa AlgebraicSet{Float64}
+            @test S isa BasicSemialgebraicSet{Rational{BigInt}}
+            @test S.V isa AlgebraicSet{Rational{BigInt}}
         end
 
         solver = DummySolver()
@@ -136,8 +136,8 @@ Algebraic Set defined by no equality
                   @set(x ≤ y && x == 1 && 2 + y == x, solver),
                   @set(2 + y == x && x ≤ y && x == 1, solver),
                   @set(2 + y == x && x ≤ y && x == 1, solver)]
-            @test S isa BasicSemialgebraicSet{Float64}
-            @test S.V isa AlgebraicSet{Float64}
+            @test S isa BasicSemialgebraicSet{Rational{BigInt}}
+            @test S.V isa AlgebraicSet{Rational{BigInt}}
             @test S.V.solver === solver
         end
     end
