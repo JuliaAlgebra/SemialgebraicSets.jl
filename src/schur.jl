@@ -18,20 +18,18 @@ function clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
         # See bug JuliaLang/julia#...
         return Matrix{float(eltype(M))}(undef, 0, 0), Vector{Int}[]
     else
-        _clusterordschur(M, ɛ)
+        return _clusterordschur(M, ɛ)
     end
+end
+function _clusterordschur(M::AbstractMatrix{BigFloat}, ɛ)
+    Z, clusters = _clusterordschur(Float64.(M), ɛ)
+    return convert(Matrix{BigFloat}, Z), clusters
 end
 function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     # M = Z * T * Z' and "values" gives the eigenvalues
-    if VERSION >= v"0.7-"
-        sf = schur(M)
-        Z = sf.Z
-        v = sf.values
-    else
-        sf = schurfact(M)
-        Z = sf[:Z]
-        v = sf[:values]
-    end
+    sf = LinearAlgebra.schur(M)
+    Z = sf.Z
+    v = sf.values
     # documentation says that the error on the eigenvalues is ɛ * norm(T) / conditionnumber
     nT = norm(sf.T)
 
@@ -101,5 +99,5 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
             break
         end
     end
-    Z, clusters
+    return Z, clusters
 end
