@@ -11,7 +11,7 @@ defaultalgebraicsetlibrary(p::Vector{<:APL}, solveroralgo...) = defaultalgebraic
 mutable struct AlgebraicSet{T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver, U} <: AbstractAlgebraicSet
     I::PolynomialIdeal{T, PT, A}
     projective::Bool
-    elements::Vector{Vector{T}}
+    elements::Vector{Vector{U}}
     elementscomputed::Bool
     iszerodimensional::Bool
     solver::S
