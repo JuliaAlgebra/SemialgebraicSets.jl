@@ -72,8 +72,9 @@ julia> collect(V)
 ### Solve with [MacaulayLab](http://www.macaulaylab.net/)
 
 You can solve the system with
-[MacaulayLab](http://www.macaulaylab.net/)
-as follows:
+[MacaulayLab](http://www.macaulaylab.net/) as follows.
+First install [MacaulayLab.jl](https://github.com/blegat/MacaulayLab.jl)
+and then run the following:
 ```julia
 julia> using DynamicPolynomial, MacaulayLab, SemialgebraicSets
 
