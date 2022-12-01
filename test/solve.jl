@@ -13,23 +13,27 @@ using LinearAlgebra # for I
     A = [zeros(10, 1) Matrix(I, 10, 10); zeros(1, 10) 0.5]
     A[10, 11] = 0
     A[10, 1] = η
-    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) == [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
+    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) ==
+          [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]
 end
 
 @testset "Example 4.1 MD95" begin
-    A = [  0  0  0  1  0  0;
-           0  0  0  0  1  0;
-           0  0  0  0  0  1;
-          -1  0  1 -1  0  0;
-          -1  0  1 -2 -1  0;
-          -1  0  1 -2 -2 -1]
-    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) == [[2], [1, 5, 6]]
+    A = [
+        0 0 0 1 0 0
+        0 0 0 0 1 0
+        0 0 0 0 0 1
+        -1 0 1 -1 0 0
+        -1 0 1 -2 -1 0
+        -1 0 1 -2 -2 -1
+    ]
+    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) ==
+          [[2], [1, 5, 6]]
 end
 
-function testelements(X, Y; atol=Base.rtoldefault(Float64), kwargs...)
+function testelements(X, Y; atol = Base.rtoldefault(Float64), kwargs...)
     @test length(X) == length(Y)
     for y in Y
-        @test any(x -> isapprox(x, y; atol=atol, kwargs...), X)
+        @test any(x -> isapprox(x, y; atol = atol, kwargs...), X)
     end
 end
 function testelementstypes(X, Y; kwargs...)
@@ -49,7 +53,10 @@ end
 
 # We use a fixed RNG in the tests to decrease nondeterminism. There is still nondeterminism in LAPACK though
 using Random
-solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), MersenneTwister(0))
+solver = ReorderedSchurMultiplicationMatricesSolver(
+    sqrt(eps(Float64)),
+    MersenneTwister(0),
+)
 
 @testset "Zero-dimensional ideal" begin
     Mod.@polyvar x y z
@@ -63,7 +70,7 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     testelementstypes(V, [[0]])
     V = @set y == x^2 && z == x^3 solver
     @test !is_zero_dimensional(V)
-    V = @set x^3 == 2x*y &&  x^2*y == 2y^2 + x solver
+    V = @set x^3 == 2x * y && x^2 * y == 2y^2 + x solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[0, 0]])
     V = @set x == 1 solver
@@ -75,7 +82,7 @@ solver = ReorderedSchurMultiplicationMatricesSolver(sqrt(eps(Float64)), Mersenne
     V = @set x == 4 && y^2 == x solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[4, 2], [4, -2]])
-    V = @set x^2 + x == 6 && y == x+1 solver
+    V = @set x^2 + x == 6 && y == x + 1 solver
     @test is_zero_dimensional(V)
     testelements(V, [[2, 3], [-3, -2]])
     V = @set x^2 + x == 6 && y^2 == x solver
@@ -106,17 +113,33 @@ end
 
 @testset "Example 5.1 of CGT97" begin
     ɛ = 1e-4
-    Iɛ = [1 - ɛ 0
-          0     1 + ɛ]
-    J = [0 1
-         1 0]
+    Iɛ = [
+        1-ɛ 0
+        0 1+ɛ
+    ]
+    J = [
+        0 1
+        1 0
+    ]
     Z = zeros(2, 2)
-    A = [Iɛ Z
-         Z  J]
-    B = [J Z
-         Z Iɛ]
+    A = [
+        Iɛ Z
+        Z J
+    ]
+    B = [
+        J Z
+        Z Iɛ
+    ]
     α = 0.219
-    testelements(SemialgebraicSets._solve_multiplication_matrices([A, B], [α, 1-α], ReorderedSchurMultiplicationMatricesSolver{Float64}()), [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]; rtol=1e-7)
+    testelements(
+        SemialgebraicSets._solve_multiplication_matrices(
+            [A, B],
+            [α, 1 - α],
+            ReorderedSchurMultiplicationMatricesSolver{Float64}(),
+        ),
+        [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]];
+        rtol = 1e-7,
+    )
 end
 
 @testset "Example 4.3 of MD95" begin
@@ -125,17 +148,50 @@ end
     # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
     # the second and third do not seem that close but when the three first are averaged it is very close to zero.
     @test is_zero_dimensional(V)
-    testelementstypes(V, [[0.66209555, 0.935259169], [0.66209555, -0.935259169], [0.0516329456, -0.025825086], [0.0516329456, 0.025825086], [0, 0]])
+    testelementstypes(
+        V,
+        [
+            [0.66209555, 0.935259169],
+            [0.66209555, -0.935259169],
+            [0.0516329456, -0.025825086],
+            [0.0516329456, 0.025825086],
+            [0, 0],
+        ],
+    )
 end
 
 @testset "Example 5.2 of CGT97" begin
     Mod.@polyvar x y z
-    V = @set x^2 + y^2 == 1 && x^3 + (2 + z)*x*y + y^3 == 1 && z^2 == 2 solver
+    V =
+        @set x^2 + y^2 == 1 && x^3 + (2 + z) * x * y + y^3 == 1 && z^2 == 2 solver
     @test is_zero_dimensional(V)
     iszd, B = monomial_basis(V.I)
     @test iszd
-    @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
-    testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
+    @test B == [
+        y^3 * z,
+        x * y * z,
+        y^3,
+        y^2 * z,
+        x * y,
+        x * z,
+        y^2,
+        y * z,
+        x,
+        y,
+        z,
+        1,
+    ]
+    testelements(
+        V,
+        [
+            [0, 1, √2],
+            [0, 1, -√2],
+            [1, 0, -√2],
+            [1, 0, √2],
+            [-√2 / 2, -√2 / 2, √2],
+            [√2 / 2, √2 / 2, -√2],
+        ],
+    )
 end
 
 #@testset "Example 4.4 of MD95 and 5.3 of CGT97" begin
