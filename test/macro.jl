@@ -5,14 +5,14 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
     @test isa(FullSpace(), FullSpace)
     V = @set x * y == 1
     @test V isa AlgebraicSet{Rational{BigInt}}
-    @test_throws ArgumentError addinequality!(V, x * y)
+    @test_throws ArgumentError add_inequality!(V, x * y)
     @testset "Basic" begin
         S = @set x - y == 0 && x^2 * y >= 1
-        addequality!(S, x^2 - y)
-        addinequality!(S, x + y - 1)
+        add_equality!(S, x^2 - y)
+        add_inequality!(S, x + y - 1)
         # Algebraic set forces `Rational{BigInt}`
         @test S isa BasicSemialgebraicSet{Rational{BigInt}}
-        @test S == basicsemialgebraicset(S.V, S.p)
+        @test S == basic_semialgebraic_set(S.V, S.p)
         @test sprint(show, S) ==
               "{ (x, y) | -y + x = 0, -y + x^2 = 0, -1//1 + x^2*y ≥ 0, -1//1 + y + x ≥ 0 }"
         @test sprint(show, MIME"text/plain"(), S) ==

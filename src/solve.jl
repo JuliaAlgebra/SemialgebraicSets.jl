@@ -13,9 +13,7 @@ abstract type AbstractAlgebraicSolver end
 Solve the algebraic equations for which `V` is the set of solutions using the algorithm `algo`.
 Returns a nullable which is `null` if `V` is not zero-dimensional and is the list of solutions otherwise.
 """
-function solvealgebraicequations(V::AbstractAlgebraicSet)
-    return solvealgebraicequations(V, defaultalgebraicsolver(V))
-end
+solve(V::AbstractAlgebraicSet) = solve(V, default_algebraic_solver(V))
 
 """
     AbstractMultiplicationMatricesAlgorithm
@@ -25,12 +23,12 @@ Algorithm computing multiplication matrices from algebraic equations.
 abstract type AbstractMultiplicationMatricesAlgorithm end
 
 """
-    multiplicationmatrices(V::AbstractAlgebraicSet, algo::AbstractMultiplicationMatricesAlgorithm)::Union{Nothing, Vector{<:AbstractMatrix}}
+    multiplication_matrices(V::AbstractAlgebraicSet, algo::AbstractMultiplicationMatricesAlgorithm)
 
 Computing multiplication matrices from the algebraic equations for which `V` is the set of solution using the algorithm `algo`.
 Returns a nullable which is `null` if `V` is not zero-dimensional and is the list of multiplication matrices otherwise.
 """
-function multiplicationmatrices end
+function multiplication_matrices end
 
 """
     AbstractMultiplicationMatricesSolver
@@ -39,38 +37,28 @@ Solver of algebraic equations using multiplication matrices.
 """
 abstract type AbstractMultiplicationMatricesSolver end
 
-"""
-    solvemultiplicationmatrices(Ms::AbstractVector{<:AbstractMatrix{T}}, algo::AbstractMultiplicationMatricesSolver)::Vector{Vector{T}} where T
-
-Solve the algebraic equations having multiplication matrices `Ms` using the algorithm `algo`.
-Returns the list of solutions.
-"""
-function solvemultiplicationmatrices end
-
-struct SolverUsingMultiplicationMatrices{
-    A<:AbstractMultiplicationMatricesAlgorithm,
-    S<:AbstractMultiplicationMatricesSolver,
-} <: AbstractAlgebraicSolver
+struct SolverUsingMultiplicationMatrices{A<:AbstractMultiplicationMatricesAlgorithm,S<:AbstractMultiplicationMatricesSolver} <: AbstractAlgebraicSolver
     algo::A
     solver::S
 end
 
-function solvealgebraicequations(
-    V::AbstractAlgebraicSet,
-    solver::SolverUsingMultiplicationMatrices,
-)
-    Ms = multiplicationmatrices(V, solver.algo)
+function solve(V, solver::SolverUsingMultiplicationMatrices)
+    Ms = multiplication_matrices(V, solver.algo)
     if Ms === nothing
         nothing
     else
-        solvemultiplicationmatrices(Ms, solver.solver)
+        solve(Ms, solver.solver)
     end
 end
 
-struct GröbnerBasisMultiplicationMatricesAlgorithm <:
-       AbstractMultiplicationMatricesAlgorithm end
+struct MultiplicationMatrices{Ms}
+    matrices::Ms
+end
 
-function multiplicationmatrix(V::AbstractAlgebraicSet, v::AbstractVariable, B)
+struct GröbnerBasisMultiplicationMatricesAlgorithm <: AbstractMultiplicationMatricesAlgorithm
+end
+
+function multiplication_matrix(V, v::AbstractVariable, B)
     M = Matrix{eltype(eltype(V))}(undef, length(B), length(B))
     for i in 1:length(B)
         p = rem(v * B[i], equalities(V))
@@ -79,20 +67,17 @@ function multiplicationmatrix(V::AbstractAlgebraicSet, v::AbstractVariable, B)
     return M
 end
 
-function multiplicationmatrices(
-    V::AbstractAlgebraicSet,
-    algo::GröbnerBasisMultiplicationMatricesAlgorithm,
-)
+function multiplication_matrices(V, algo::GröbnerBasisMultiplicationMatricesAlgorithm)
     vars = variables(V.I)
-    iszd, B = monomialbasis(V.I, vars)
+    iszd, B = monomial_basis(V.I, vars)
     if !iszd
-        nothing
+        return
     else
         n = length(vars)
         if iszero(n)
-            Matrix{eltype(eltype(T))}[]
+            return Matrix{eltype(eltype(V))}[]
         else
-            [multiplicationmatrix(V, v, B) for v in vars]
+            return MultiplicationMatrices([multiplication_matrix(V, v, B) for v in vars])
         end
     end
 end
@@ -102,33 +87,21 @@ include("schur.jl")
 """
 Corless, R. M.; Gianni, P. M. & Trager, B. M. A reordered Schur factorization method for zero-dimensional polynomial systems with multiple roots Proceedings of the 1997 international symposium on Symbolic and algebraic computation, 1997, 133-140
 """
-struct ReorderedSchurMultiplicationMatricesSolver{T,RNGT<:Random.AbstractRNG} <:
-       AbstractMultiplicationMatricesSolver
+struct ReorderedSchurMultiplicationMatricesSolver{T,RNGT<:Random.AbstractRNG} <: AbstractMultiplicationMatricesSolver
     ɛ::T
     rng::RNGT
 end
-function ReorderedSchurMultiplicationMatricesSolver(ɛ)
-    return ReorderedSchurMultiplicationMatricesSolver(ɛ, Random.GLOBAL_RNG)
-end
-function ReorderedSchurMultiplicationMatricesSolver{T}() where {T}
-    return ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(real(T)))
-end
+ReorderedSchurMultiplicationMatricesSolver(ɛ) = ReorderedSchurMultiplicationMatricesSolver(ɛ, Random.GLOBAL_RNG)
+ReorderedSchurMultiplicationMatricesSolver{T}() where {T} = ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(real(T)))
 
-function solvemultiplicationmatrices(
-    Ms::AbstractVector{<:AbstractMatrix{T}},
-    solver::ReorderedSchurMultiplicationMatricesSolver,
-) where {T}
-    λ = rand(solver.rng, length(Ms))
+function solve(Ms::MultiplicationMatrices, solver::ReorderedSchurMultiplicationMatricesSolver)
+    λ = rand(solver.rng, length(Ms.matrices))
     λ /= sum(λ)
-    return _solvemultiplicationmatrices(Ms, λ, solver)
+    return _solve_multiplication_matrices(Ms.matrices, λ, solver)
 end
 
 # Deterministic part
-function _solvemultiplicationmatrices(
-    Ms::AbstractVector{<:AbstractMatrix{T}},
-    λ,
-    solver::ReorderedSchurMultiplicationMatricesSolver,
-) where {T<:Real}
+function _solve_multiplication_matrices(Ms::AbstractVector{<:AbstractMatrix{T}}, λ, solver::ReorderedSchurMultiplicationMatricesSolver) where {T<:Real}
     @assert length(Ms) == length(λ)
     n = length(λ)
     Z, clusters = clusterordschur(sum(λ .* Ms), solver.ɛ)
@@ -149,37 +122,23 @@ function _solvemultiplicationmatrices(
     return vals
 end
 
-function algebraicsolver(
+function algebraic_solver(
     algo::AbstractMultiplicationMatricesAlgorithm,
     solver::AbstractMultiplicationMatricesSolver,
 )
     return SolverUsingMultiplicationMatrices(algo, solver)
 end
 
-function defaultmultiplicationmatricesalgorithm(p)
-    return GröbnerBasisMultiplicationMatricesAlgorithm()
-end
-function defaultmultiplicationmatricessolver(::Type{T}) where {T}
-    return ReorderedSchurMultiplicationMatricesSolver{T}()
-end
-function defaultmultiplicationmatricessolver(
-    ::AbstractVector{PT},
-) where {T,PT<:APL{T}}
-    return defaultmultiplicationmatricessolver(T)
-end
+default_multiplication_matrices_algorithm(p) = GröbnerBasisMultiplicationMatricesAlgorithm()
+default_multiplication_matrices_solver(::Type{T}) where {T} = ReorderedSchurMultiplicationMatricesSolver{T}()
+default_multiplication_matrices_solver(::AbstractVector{PT}) where {T,PT<:APL{T}} = default_multiplication_matrices_solver(T)
 
-function defaultalgebraicsolver(p)
-    return algebraicsolver(
-        defaultmultiplicationmatricesalgorithm(p),
-        defaultmultiplicationmatricessolver(p),
-    )
+function default_algebraic_solver(p)
+    return algebraic_solver(default_multiplication_matrices_algorithm(p), default_multiplication_matrices_solver(p))
 end
-function defaultalgebraicsolver(
-    p,
-    algo::AbstractMultiplicationMatricesAlgorithm,
-)
-    return algebraicsolver(algo, defaultmultiplicationmatricessolver(p))
+function default_algebraic_solver(p, algo::AbstractMultiplicationMatricesAlgorithm)
+    return algebraic_solver(algo, default_multiplication_matrices_solver(p))
 end
-function defaultalgebraicsolver(p, solver::AbstractMultiplicationMatricesSolver)
-    return algebraicsolver(defaultmultiplicationmatricesalgorithm(p), solver)
+function default_algebraic_solver(p, solver::AbstractMultiplicationMatricesSolver)
+    return algebraic_solver(default_multiplication_matrices_algorithm(p), solver)
 end

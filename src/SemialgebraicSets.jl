@@ -10,10 +10,12 @@ const MP = MultivariatePolynomials
 
 const APL = AbstractPolynomialLike
 
+import CommonSolve: solve
+
 export AbstractSemialgebraicSet,
     AbstractBasicSemialgebraicSet, AbstractAlgebraicSet
 export FullSpace,
-    AlgebraicSet, BasicSemialgebraicSet, addequality!, addinequality!
+    AlgebraicSet, BasicSemialgebraicSet, add_equality!, add_inequality!
 
 # Semialgebraic set described by polynomials with coefficients in T
 abstract type AbstractSemialgebraicSet end
@@ -21,7 +23,7 @@ abstract type AbstractSemialgebraicSet end
 abstract type AbstractBasicSemialgebraicSet <: AbstractSemialgebraicSet end
 abstract type AbstractAlgebraicSet <: AbstractBasicSemialgebraicSet end
 
-function addinequality!(S::AbstractAlgebraicSet, p)
+function add_inequality!(S::AbstractAlgebraicSet, p)
     throw(ArgumentError("Cannot add inequality to an algebraic set"))
 end
 
