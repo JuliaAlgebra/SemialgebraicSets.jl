@@ -1,9 +1,11 @@
-export monomialbasis, ideal
+export monomial_basis, ideal
 
 abstract type AbstractPolynomialIdeal end
 
 struct EmptyPolynomialIdeal <: AbstractPolynomialIdeal end
-ideal(p::FullSpace, algo=defaultgröbnerbasisalgorithm(p)) = EmptyPolynomialIdeal()
+function ideal(p::FullSpace, algo = default_gröbner_basis_algorithm(p))
+    return EmptyPolynomialIdeal()
+end
 Base.rem(p::AbstractPolynomialLike, I::EmptyPolynomialIdeal) = p
 
 promote_for_division(::Type{T}) where {T} = T
@@ -13,49 +15,63 @@ function promote_for_division(::Type{Complex{T}}) where {T}
     return Complex{promote_for_division(T)}
 end
 
-mutable struct PolynomialIdeal{T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm} <: AbstractPolynomialIdeal
+mutable struct PolynomialIdeal{T,PT<:APL{T},A<:Abstractgröbner_basisAlgorithm} <:
+               AbstractPolynomialIdeal
     p::Vector{PT}
-    gröbnerbasis::Bool
+    gröbner_basis::Bool
     algo::A
 end
-function PolynomialIdeal{T, PT}(p::Vector{PT}, algo::A) where {T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm}
-    PolynomialIdeal{T, PT, A}(p, false, algo)
+function PolynomialIdeal{T,PT}(
+    p::Vector{PT},
+    algo::A,
+) where {T,PT<:APL{T},A<:Abstractgröbner_basisAlgorithm}
+    return PolynomialIdeal{T,PT,A}(p, false, algo)
 end
-function PolynomialIdeal(p::Vector{PT}, algo) where {T, PT<:APL{T}}
+function PolynomialIdeal(p::Vector{PT}, algo) where {T,PT<:APL{T}}
     S = promote_for_division(T)
-    PolynomialIdeal{S, polynomialtype(PT, S)}(AbstractVector{polynomialtype(PT, S)}(p), algo)
+    return PolynomialIdeal{S,polynomialtype(PT, S)}(
+        AbstractVector{polynomialtype(PT, S)}(p),
+        algo,
+    )
 end
-function PolynomialIdeal{T, PT}() where {T, PT<:APL{T}}
-    PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(PT))
+function PolynomialIdeal{T,PT}() where {T,PT<:APL{T}}
+    return PolynomialIdeal(PT[], default_gröbner_basis_algorithm(PT))
 end
 
-function Base.convert(::Type{PolynomialIdeal{T, PT, A}}, I::PolynomialIdeal{T, PT, A}) where {T, PT<:APL{T}, A<:AbstractGröbnerBasisAlgorithm}
+function Base.convert(
+    ::Type{PolynomialIdeal{T,PT,A}},
+    I::PolynomialIdeal{T,PT,A},
+) where {T,PT<:APL{T},A<:Abstractgröbner_basisAlgorithm}
     return I
 end
-function Base.convert(::Type{PolynomialIdeal{T, PT, A}}, I::PolynomialIdeal) where {T, PT, A}
-    return PolynomialIdeal{T, PT, A}(I.p, I.gröbnerbasis, I.algo)
+function Base.convert(
+    ::Type{PolynomialIdeal{T,PT,A}},
+    I::PolynomialIdeal,
+) where {T,PT,A}
+    return PolynomialIdeal{T,PT,A}(I.p, I.gröbner_basis, I.algo)
 end
 
+ideal(p, algo = default_gröbner_basis_algorithm(p)) = PolynomialIdeal(p, algo)
 
-ideal(p, algo=defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
-
-Base.:+(I::PolynomialIdeal, J::PolynomialIdeal) = PolynomialIdeal([I.p; J.p], I.algo)
+function Base.:+(I::PolynomialIdeal, J::PolynomialIdeal)
+    return PolynomialIdeal([I.p; J.p], I.algo)
+end
 
 MP.variables(I::PolynomialIdeal) = variables(I.p)
 
 function Base.rem(p::AbstractPolynomialLike, I::PolynomialIdeal)
-    computegröbnerbasis!(I)
-    rem(p, I.p)
+    compute_gröbner_basis!(I)
+    return rem(p, I.p)
 end
 
-function computegröbnerbasis!(I::PolynomialIdeal)
-    if !I.gröbnerbasis
-        gröbnerbasis!(I.p, I.algo)
-        I.gröbnerbasis = true
+function compute_gröbner_basis!(I::PolynomialIdeal)
+    if !I.gröbner_basis
+        gröbner_basis!(I.p, I.algo)
+        I.gröbner_basis = true
     end
 end
-function monomialbasis(I, vars=variables(I))
-    computegröbnerbasis!(I)
+function monomial_basis(I, vars = variables(I))
+    compute_gröbner_basis!(I)
     if isempty(I.p)
         return false, monomialtype(eltype(I.p))[]
     end
@@ -77,5 +93,6 @@ function monomialbasis(I, vars=variables(I))
     if any(lv .< 0)
         return false, monomialtype(eltype(I.p))[]
     end
-    return true, monomials(vars, 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
+    return true,
+    monomials(vars, 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
 end

@@ -23,9 +23,9 @@ using TypedPolynomials
 Once the algebraic set has been created, you can check whether it is zero-dimensional and if it is the case, you can get the finite number of elements of the set simply by iterating over it, or by using `collect` to transform it into an array containing the solutions.
 ```julia
 V = @set y == x^2 && z == x^3
-iszerodimensional(V) # should return false
+is_zero_dimensional(V) # should return false
 V = @set x^2 + x == 6 && y == x+1
-iszerodimensional(V) # should return true
+is_zero_dimensional(V) # should return true
 collect(V) # should return [[2, 3], [-3, -2]]
 ```
 The code sample above solves the system of algbraic equations by first

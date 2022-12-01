@@ -26,7 +26,7 @@ end
         @test all(_isz.(G - H))
     end
     function testf(F, H)
-        testg(gröbnerbasis(F), H)
+        testg(gröbner_basis(F), H)
     end
     testf([4x^2 + 5x, 3x^3], [x])
     testf([y - x^2, z - x^3], [x*z - y^2, x*y - z, x^2 - y, y^3 - z^2])
@@ -40,12 +40,12 @@ end
          x^5 + x*y/3,
          y^6 + 3y^5 + 9x^4 + 9x^3*y + y^3/3 - x^2 - x*y - y^2 - 3x]
     function testb(pre, sel)
-        testg(groebnerbasis(F, Buchberger(Base.rtoldefault(Float64), pre, sel)), H)
+        testg(groebner_basis(F, Buchberger(Base.rtoldefault(Float64), pre, sel)), H)
     end
-    testb(identity, dummyselection)
-    testb(identity, normalselection)
-    testb(presort!, dummyselection)
-    testb(presort!, normalselection)
+    testb(identity, dummy_selection)
+    testb(identity, normal_selection)
+    testb(presort!, dummy_selection)
+    testb(presort!, normal_selection)
 end
 
 @testset "Reduce" begin

@@ -2,13 +2,19 @@ using LinearAlgebra
 
 # If i, i+1 are conjugate pair, then they need to be either both in I or both not in I.
 # If one of them is in I and the other is not then LAPACK will consider that both of them are in I.
-function conditionnumber(sf::Schur, I)
+function condition_number(sf::Schur, I)
     n = length(sf.values)
     select = zeros(LinearAlgebra.BlasInt, n)
     for i in I
         select[i] = 1
     end
-    LinearAlgebra.LAPACK.trsen!('E', 'N', select, copy(sf.T), copy(sf.Z))[4]
+    return LinearAlgebra.LAPACK.trsen!(
+        'E',
+        'N',
+        select,
+        copy(sf.T),
+        copy(sf.Z),
+    )[4]
 end
 
 # Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
@@ -30,10 +36,10 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     sf = LinearAlgebra.schur(M)
     Z = sf.Z
     v = sf.values
-    # documentation says that the error on the eigenvalues is ɛ * norm(T) / conditionnumber
+    # documentation says that the error on the eigenvalues is ɛ * norm(T) / condition_number
     nT = norm(sf.T)
 
-    _atol(I) = ɛ * nT / conditionnumber(sf, I)
+    _atol(I) = ɛ * nT / condition_number(sf, I)
 
     A = typeof(_atol(1))
     V = real(eltype(v))
@@ -43,7 +49,7 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     clusters = Vector{Int}[]
     λ = V[]
     atol = A[]
-    # conditionnumber requires that conjugate pair need to be treated together so we first need to handle them
+    # condition_number requires that conjugate pair need to be treated together so we first need to handle them
     # If they are in the same cluster then pair them, otherwise it is complex solution so we reject them
     i = 1
     while i <= lastindex(v)
@@ -54,10 +60,10 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
             i += 1
         else
             @assert i < lastindex(v) && !isreal(v[i+1])
-            pairatol = _atol([i, i+1])
+            pairatol = _atol([i, i + 1])
             if abs(v[i] - v[i+1]) / pairatol < ONE
                 # Pair conjugate pairs into a real eigenvalue
-                push!(clusters, [i, i+1])
+                push!(clusters, [i, i + 1])
                 push!(λ, real((v[i] + v[i+1]) / 2)) # The imaginary part should be zero anyway
                 push!(atol, pairatol)
             end

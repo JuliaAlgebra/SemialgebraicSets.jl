@@ -5,13 +5,13 @@ const MP = MultivariatePolynomials
 
 using SemialgebraicSets
 
-struct DummyAlgo <: SemialgebraicSets.AbstractGröbnerBasisAlgorithm end
-function SemialgebraicSets.gröbnerbasis!(::AbstractVector{<:MP.APL}, ::DummyAlgo)
+struct DummyAlgo <: SemialgebraicSets.Abstractgröbner_basisAlgorithm end
+function SemialgebraicSets.gröbner_basis!(::AbstractVector{<:MP.APL}, ::DummyAlgo)
     error("Dummy algo")
 end
 
 struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
-function SemialgebraicSets.solvealgebraicequations(
+function SemialgebraicSets.solve(
     ::SemialgebraicSets.AlgebraicSet,
     ::DummySolver,
 )
@@ -32,6 +32,6 @@ function algo_and_solver_test(func)
 end
 
 @testset "Algo and solver" begin
-    algo_and_solver_test(algebraicset)
-    algo_and_solver_test(projectivealgebraicset)
+    algo_and_solver_test(algebraic_set)
+    algo_and_solver_test(projective_algebraic_set)
 end
