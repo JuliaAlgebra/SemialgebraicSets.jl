@@ -18,7 +18,7 @@ mutable struct AlgebraicSet{T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver, U} <: 
 end
 AlgebraicSet{T, PT, A, S, U}(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S, U} = AlgebraicSet{T, PT, A, S, U}(I, false, Vector{U}[], false, false, solver)
 AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = AlgebraicSet{T, PT, A, S, float(T)}(I, solver)
-AlgebraicSet{T, PT}() where {T, U, S, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
+AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
 AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = AlgebraicSet(ideal(p, algo), solver)
 
 MP.changecoefficienttype(::Type{AlgebraicSet{U, PU, A, S, UU}}, T::Type) where {U, PU, A, S, UU} = AlgebraicSet{T, MP.changecoefficienttype(PU, T), A, S, float(T)}
