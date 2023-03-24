@@ -15,10 +15,10 @@ function spolynomial(p::APL, q::APL)
     ltp = leadingterm(p)
     # `MA.operate` ensures that the returned value can be mutated without
     # affecting either `a` or `p`.
-    a = MA.operate(*, MP._div(m, monomial(ltp)), p)
+    a = MA.operate(*, MP.div_multiple(m, monomial(ltp)), p)
     ad = MA.operate!!(/, a, MP.coefficient(ltp))
     ltq = leadingterm(q)
-    b = MA.operate(*, MP._div(m, monomial(ltq)), q)
+    b = MA.operate(*, MP.div_multiple(m, monomial(ltq)), q)
     bd = MA.operate!!(/, b, MP.coefficient(ltq))
     return MA.operate!!(-, ad, bd)
 end

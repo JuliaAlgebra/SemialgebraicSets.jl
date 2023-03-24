@@ -67,7 +67,7 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     σ = sortperm(λ)
 
     # For eigenvalues not clustered yet, their eigenvalues is quite large.
-    # Therefore, if we cluster all i, j close enough at once we migth cluster too much
+    # Therefore, if we cluster all i, j close enough at once we might cluster too much
     # The technique used here is to cluster only the closest pair.
     # Once they are matched, a new atol is computed and if the cluster is complete,
     # this atol will be small which will avoid addition of new eigenvalues.

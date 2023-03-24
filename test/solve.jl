@@ -134,7 +134,7 @@ end
     @test iszerodimensional(V)
     iszd, B = monomialbasis(V.I)
     @test iszd
-    @test B == [y^3*z, x*y*z, y^3, y^2*z, x*y, x*z, y^2, y*z, x, y, z, 1]
+    @test B == [1, z, y, x, y*z, y^2, x*z, x*y, y^2*z, y^3, x*y*z, y^3*z]
     testelements(V, [[0, 1, √2], [0, 1, -√2], [1, 0, -√2], [1, 0, √2], [-√2/2, -√2/2, √2], [√2/2, √2/2, -√2]])
 end
 
