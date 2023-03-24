@@ -13,11 +13,11 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
         # Algebraic set forces `Rational{BigInt}`
         @test S isa BasicSemialgebraicSet{Rational{BigInt}}
         @test S == basicsemialgebraicset(S.V, S.p)
-        @test sprint(show, S) == "{ (x, y) | x - y = 0, x^2 - y = 0, x^2*y - 1//1 ≥ 0, x + y - 1//1 ≥ 0 }"
-        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n2 inequalities\n x^2*y - 1//1 ≥ 0\n x + y - 1//1 ≥ 0\n"
+        @test sprint(show, S) == "{ (x, y) | -y + x = 0, -y + x^2 = 0, -1//1 + x^2*y ≥ 0, -1//1 + y + x ≥ 0 }"
+        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 2 equalities\n -y + x = 0\n -y + x^2 = 0\n2 inequalities\n -1//1 + x^2*y ≥ 0\n -1//1 + y + x ≥ 0\n"
         @test S.V isa AlgebraicSet{Rational{BigInt}}
-        @test sprint(show, S.V) == "{ (x, y) | x - y = 0, x^2 - y = 0 }"
-        @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 2 equalities\n x - y = 0\n x^2 - y = 0\n"
+        @test sprint(show, S.V) == "{ (x, y) | -y + x = 0, -y + x^2 = 0 }"
+        @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 2 equalities\n -y + x = 0\n -y + x^2 = 0\n"
         @test S === MultivariatePolynomials.changecoefficienttype(S, Rational{BigInt})
         @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Rational{BigInt})
         @test S.V.I === convert(typeof(S.V.I), S.V.I)
@@ -45,18 +45,18 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
 
         @testset "Different variables" begin
             T = (@set x == x^2 && y <= y^2)
-            @test sprint(show, T) == "{ (x, y) | -x^2 + x = 0, y^2 - y ≥ 0 }"
-            @test sprint(show, MIME"text/plain"(), T) == "Basic semialgebraic Set defined by 1 equalitty\n -x^2 + x = 0\n1 inequalitty\n y^2 - y ≥ 0\n"
+            @test sprint(show, T) == "{ (x, y) | x - x^2 = 0, -y + y^2 ≥ 0 }"
+            @test sprint(show, MIME"text/plain"(), T) == "Basic semialgebraic Set defined by 1 equalitty\n x - x^2 = 0\n1 inequalitty\n -y + y^2 ≥ 0\n"
         end
     end
     @testset "Basic with no equality" begin
         S = @set x + y ≥ 1 && x ≤ y
-        @test sprint(show, S) == "{ (x, y) | x + y - 1 ≥ 0, -x + y ≥ 0 }"
+        @test sprint(show, S) == "{ (x, y) | -1 + y + x ≥ 0, y - x ≥ 0 }"
         @test sprint(show, MIME"text/plain"(), S) == """
 Basic semialgebraic Set defined by no equality
 2 inequalities
- x + y - 1 ≥ 0
- -x + y ≥ 0
+ -1 + y + x ≥ 0
+ y - x ≥ 0
 """
         @test sprint(show, S.V) == "R^n"
         @test sprint(show, MIME"text/plain"(), S.V) == """
@@ -77,10 +77,10 @@ Algebraic Set defined by no equality
     end
     @testset "Basic with fixed variables" begin
         S = @set x == 1 && x ≤ x^2
-        @test sprint(show, S) == "{ (x) | x - 1 = 0, x^2 - x ≥ 0 }"
-        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 1 equalitty\n x - 1 = 0\n1 inequalitty\n x^2 - x ≥ 0\n"
-        @test sprint(show, S.V) == "{ (x) | x - 1 = 0 }"
-        @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 1 equalitty\n x - 1 = 0\n"
+        @test sprint(show, S) == "{ (x) | -1 + x = 0, -x + x^2 ≥ 0 }"
+        @test sprint(show, MIME"text/plain"(), S) == "Basic semialgebraic Set defined by 1 equalitty\n -1 + x = 0\n1 inequalitty\n -x + x^2 ≥ 0\n"
+        @test sprint(show, S.V) == "{ (x) | -1 + x = 0 }"
+        @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 1 equalitty\n -1 + x = 0\n"
 
         S = @set x == 1 && x ≤ y && 2 == y
         @test S isa BasicSemialgebraicSet{Int}
