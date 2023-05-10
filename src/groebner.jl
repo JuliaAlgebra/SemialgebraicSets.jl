@@ -11,13 +11,13 @@ S(p, q) =  \\frac{m}{\\mathrm{\\mathsc{LT}}(p)} \\cdot p - \\frac{m}{\\mathrm{\\
 where ``m = \\mathrm{lcm}(\\mathrm{\\mathsc{LM}}(p), \\mathrm{\\mathsc{LM}}(q))``.
 """
 function spolynomial(p::APL, q::APL)
-    m = lcm(leadingmonomial(p), leadingmonomial(q))
-    ltp = leadingterm(p)
+    m = lcm(leading_monomial(p), leading_monomial(q))
+    ltp = leading_term(p)
     # `MA.operate` ensures that the returned value can be mutated without
     # affecting either `a` or `p`.
     a = MA.operate(*, MP.div_multiple(m, monomial(ltp)), p)
     ad = MA.operate!!(/, a, MP.coefficient(ltp))
-    ltq = leadingterm(q)
+    ltq = leading_term(q)
     b = MA.operate(*, MP.div_multiple(m, monomial(ltq)), q)
     bd = MA.operate!!(/, b, MP.coefficient(ltq))
     return MA.operate!!(-, ad, bd)
@@ -36,7 +36,7 @@ function reducebasis!(F::AbstractVector{<:APL}; kwargs...)
                 deleteat!(keep, findfirst(isequal(j), keep))
                 push!(del, j)
                 changed = true # Should probably not set that, no need to do one more loop int this case
-            elseif leadingmonomial(r) != leadingmonomial(F[j])
+            elseif leading_monomial(r) != leading_monomial(F[j])
                 F[j] = r
                 changed = true
             end
@@ -47,14 +47,14 @@ end
 
 ext(i, j) = (min(i, j), max(i, j))
 
-lcmlm(F, i, j) = lcm(leadingmonomial(F[i]), leadingmonomial(F[j]))
+lcmlm(F, i, j) = lcm(leading_monomial(F[i]), leading_monomial(F[j]))
 
 function criterion(F, B, i, j)
     m = lcmlm(F, i, j)
     for k in eachindex(F)
         if k != i && k != j &&
             !(ext(i, k) in B) && !(ext(j, k) in B) &&
-            divides(leadingmonomial(F[k]), m)
+            divides(leading_monomial(F[k]), m)
             return true
         end
     end
@@ -71,7 +71,7 @@ end
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition p. 116
 function presort!(F)
-    sort!(F, by=leadingmonomial)
+    sort!(F, by=leading_monomial)
 end
 
 # Selection of (i, j) ∈ B
@@ -122,8 +122,8 @@ function gröbnerbasis!(F::AbstractVector{<:APL}, algo=defaultgröbnerbasisalgor
     B = Set{NTuple{2, Int}}(Iterators.filter(t -> t[1] < t[2], (i, j) for i in eachindex(F), j in eachindex(F)))
     while !isempty(B)
         (i, j) = algo.sel(F, B)
-        lmi = leadingmonomial(F[i])
-        lmj = leadingmonomial(F[j])
+        lmi = leading_monomial(F[i])
+        lmj = leading_monomial(F[j])
         if !isconstant(gcd(lmi, lmj)) && !criterion(F, B, i, j)
             #r = rem(spolynomial(F[i], F[j]), F; ztol=algo.ztol)
             r = rem(spolynomial(F[i], F[j]), F)

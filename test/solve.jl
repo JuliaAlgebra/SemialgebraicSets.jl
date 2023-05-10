@@ -40,7 +40,7 @@ function testelementstypes(X, Y; kwargs...)
         else
             U = float(T)
         end
-        V = MultivariatePolynomials.changecoefficienttype(X, T)
+        V = similar(X, T)
         testelements(V, Y; kwargs...)
         @test eltype(V) == Vector{U}
         @test collect(V) isa Vector{Vector{U}}

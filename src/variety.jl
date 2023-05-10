@@ -21,7 +21,7 @@ AlgebraicSet(I::PolynomialIdeal{T, PT, A}, solver::S) where {T, PT, A, S} = Alge
 AlgebraicSet{T, PT}() where {T, PT} = AlgebraicSet(PolynomialIdeal{T, PT}(), defaultalgebraicsolver(T))
 AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver) = AlgebraicSet(ideal(p, algo), solver)
 
-MP.changecoefficienttype(::Type{AlgebraicSet{U, PU, A, S, UU}}, T::Type) where {U, PU, A, S, UU} = AlgebraicSet{T, MP.changecoefficienttype(PU, T), A, S, float(T)}
+MP.similar_type(::Type{AlgebraicSet{U, PU, A, S, UU}}, T::Type) where {U, PU, A, S, UU} = AlgebraicSet{T, MP.similar_type(PU, T), A, S, float(T)}
 function Base.convert(::Type{AlgebraicSet{T, PT, A, S, U}}, set::AlgebraicSet{T, PT, A, S, U}) where {T, PT<:APL{T}, A, S<:AbstractAlgebraicSolver, U}
     return set
 end

@@ -28,10 +28,10 @@ function Base.show(io::IO, ::FullSpace)
 end
 nequalities(::FullSpace) = 0
 equalities(::FullSpace) = []
-MP.changecoefficienttype(S::Type{FullSpace}, T::Type) = S
+MP.similar_type(S::Type{FullSpace}, T::Type) = S
 
-function MP.changecoefficienttype(set::AbstractSemialgebraicSet, T::Type)
-    return convert(MP.changecoefficienttype(typeof(set), T), set)
+function Base.similar(set::AbstractSemialgebraicSet, T::Type)
+    return convert(MP.similar_type(typeof(set), T), set)
 end
 
 Base.intersect(S::AbstractAlgebraicSet, T::FullSpace) = S
