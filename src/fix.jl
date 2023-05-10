@@ -1,24 +1,34 @@
 export FixedVariablesSet
 
-struct FixedVariablesIdeal{V<:AbstractVariable, T<:Number, MT<:AbstractMonomialLike} <: AbstractPolynomialIdeal
-    substitutions::Union{Nothing, Dict{V, T}}
+struct FixedVariablesIdeal{
+    V<:AbstractVariable,
+    T<:Number,
+    MT<:AbstractMonomialLike,
+} <: AbstractPolynomialIdeal
+    substitutions::Union{Nothing,Dict{V,T}}
 end
-function Base.convert(::Type{FixedVariablesIdeal{V, T, MT}}, ideal::FixedVariablesIdeal{V, T, MT}) where {V<:AbstractVariable, T<:Number, MT<:AbstractMonomialLike}
+function Base.convert(
+    ::Type{FixedVariablesIdeal{V,T,MT}},
+    ideal::FixedVariablesIdeal{V,T,MT},
+) where {V<:AbstractVariable,T<:Number,MT<:AbstractMonomialLike}
     return ideal
 end
-function Base.convert(::Type{FixedVariablesIdeal{V, T, MT}}, ideal::FixedVariablesIdeal{V, S, MT}) where {V, S, T, MT}
+function Base.convert(
+    ::Type{FixedVariablesIdeal{V,T,MT}},
+    ideal::FixedVariablesIdeal{V,S,MT},
+) where {V,S,T,MT}
     subs = ideal.substitutions
     if subs !== nothing
-        subs = convert(Dict{V, T}, subs)
+        subs = convert(Dict{V,T}, subs)
     end
-    return FixedVariablesIdeal{V, T, MT}(subs)
+    return FixedVariablesIdeal{V,T,MT}(subs)
 end
 
-function MP.variables(ideal::FixedVariablesIdeal{V}) where V
+function MP.variables(ideal::FixedVariablesIdeal{V}) where {V}
     if generate_nonzero_constant(ideal)
         return V[]
     else
-        return sort(collect(keys(ideal.substitutions)), rev=true)
+        return sort(collect(keys(ideal.substitutions)); rev = true)
     end
 end
 # In that case, the ideal can generate any polynomial.
@@ -34,15 +44,26 @@ function Base.rem(p::AbstractPolynomialLike, I::FixedVariablesIdeal)
     end
 end
 
-struct FixedVariablesSet{V, T, MT} <: AbstractAlgebraicSet
-    ideal::FixedVariablesIdeal{V, T, MT}
+struct FixedVariablesSet{V,T,MT} <: AbstractAlgebraicSet
+    ideal::FixedVariablesIdeal{V,T,MT}
 end
-MP.similar_type(::Type{FixedVariablesSet{V, S, MT}}, T::Type) where {V, S, MT} = FixedVariablesSet{V, T, MT}
-function Base.convert(::Type{FixedVariablesSet{V, T, MT}}, set::FixedVariablesSet{V, T, MT}) where {V, T, MT}
+function MP.similar_type(
+    ::Type{FixedVariablesSet{V,S,MT}},
+    T::Type,
+) where {V,S,MT}
+    return FixedVariablesSet{V,T,MT}
+end
+function Base.convert(
+    ::Type{FixedVariablesSet{V,T,MT}},
+    set::FixedVariablesSet{V,T,MT},
+) where {V,T,MT}
     return set
 end
-function Base.convert(::Type{FixedVariablesSet{V, T, MT}}, set::FixedVariablesSet{V, S, MT}) where {V, S, T, MT}
-    return FixedVariablesSet(convert(FixedVariablesIdeal{V, T, MT}, set.ideal))
+function Base.convert(
+    ::Type{FixedVariablesSet{V,T,MT}},
+    set::FixedVariablesSet{V,S,MT},
+) where {V,S,T,MT}
+    return FixedVariablesSet(convert(FixedVariablesIdeal{V,T,MT}, set.ideal))
 end
 
 ideal(set::FixedVariablesSet, args...) = set.ideal
@@ -54,14 +75,17 @@ function nequalities(set::FixedVariablesSet)
         return length(set.ideal.substitutions)
     end
 end
-function equalities(set::FixedVariablesSet{V, T, MT}) where {V, T, MT}
+function equalities(set::FixedVariablesSet{V,T,MT}) where {V,T,MT}
     if set.ideal.substitutions === nothing
         return [constant_term(one(T), MT)]
     else
         return [key - value for (key, value) in set.ideal.substitutions]
     end
 end
-function Base.intersect(V::FixedVariablesSet{V1, T1, MT1}, W::FixedVariablesSet{V2, T2, MT2}) where {V1, V2, T1, T2, MT1, MT2}
+function Base.intersect(
+    V::FixedVariablesSet{V1,T1,MT1},
+    W::FixedVariablesSet{V2,T2,MT2},
+) where {V1,V2,T1,T2,MT1,MT2}
     # For `DynamicPolynomials`, they have the same type and for
     # `TypedPolynomials`, promoting would give `Monomial`.
     VT = V1 == V2 ? V1 : AbstractVariable
@@ -76,14 +100,14 @@ function Base.intersect(V::FixedVariablesSet{V1, T1, MT1}, W::FixedVariablesSet{
             end
             return a
         end
-        sub = Dict{VT, T}()
+        sub = Dict{VT,T}()
         merge!(combine, sub, V.ideal.substitutions)
         merge!(combine, sub, W.ideal.substitutions)
         if has_dup
             sub = nothing
         end
     end
-    ideal = FixedVariablesIdeal{VT, T, promote_type(MT1, MT2)}(sub)
+    ideal = FixedVariablesIdeal{VT,T,promote_type(MT1, MT2)}(sub)
     return FixedVariablesSet(ideal)
 end
 function Base.intersect(V::AlgebraicSet, W::FixedVariablesSet)
@@ -103,12 +127,12 @@ end
 # Assumes `isempty(V)`
 function only_point(V::FixedVariablesSet)
     subs = collect(V.ideal.substitutions)
-    sort!(subs, rev = true, by = sub -> sub[1])
+    sort!(subs; rev = true, by = sub -> sub[1])
     return [sub[2] for sub in subs]
 end
 
-Base.eltype(::FixedVariablesSet{V, T}) where {V, T} = Vector{T}
-function Base.iterate(V::FixedVariablesSet, state=nothing)
+Base.eltype(::FixedVariablesSet{V,T}) where {V,T} = Vector{T}
+function Base.iterate(V::FixedVariablesSet, state = nothing)
     if state === nothing && !isempty(V)
         return only_point(V), true
     else
@@ -117,7 +141,7 @@ function Base.iterate(V::FixedVariablesSet, state=nothing)
 end
 Base.length(V::FixedVariablesSet) = isempty(V) ? 0 : 1
 
-struct FixedVariable{V<:AbstractVariable, T}
+struct FixedVariable{V<:AbstractVariable,T}
     variable::V
     value::T
 end
@@ -130,6 +154,13 @@ end
 
 function Base.intersect(el::FixedVariable; kws...)
     subs = Dict(el.variable => el.value)
-    return FixedVariablesSet(FixedVariablesIdeal{
-        typeof(el.variable), typeof(el.value), typeof(el.variable)}(subs))
+    return FixedVariablesSet(
+        FixedVariablesIdeal{
+            typeof(el.variable),
+            typeof(el.value),
+            typeof(el.variable),
+        }(
+            subs,
+        ),
+    )
 end

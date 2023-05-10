@@ -8,7 +8,13 @@ function conditionnumber(sf::Schur, I)
     for i in I
         select[i] = 1
     end
-    LinearAlgebra.LAPACK.trsen!('E', 'N', select, copy(sf.T), copy(sf.Z))[4]
+    return LinearAlgebra.LAPACK.trsen!(
+        'E',
+        'N',
+        select,
+        copy(sf.T),
+        copy(sf.Z),
+    )[4]
 end
 
 # Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
@@ -54,10 +60,10 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
             i += 1
         else
             @assert i < lastindex(v) && !isreal(v[i+1])
-            pairatol = _atol([i, i+1])
+            pairatol = _atol([i, i + 1])
             if abs(v[i] - v[i+1]) / pairatol < ONE
                 # Pair conjugate pairs into a real eigenvalue
-                push!(clusters, [i, i+1])
+                push!(clusters, [i, i + 1])
                 push!(λ, real((v[i] + v[i+1]) / 2)) # The imaginary part should be zero anyway
                 push!(atol, pairatol)
             end
