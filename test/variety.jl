@@ -6,8 +6,11 @@ const MP = MultivariatePolynomials
 using SemialgebraicSets
 
 struct DummyAlgo <: SemialgebraicSets.AbstractGröbnerBasisAlgorithm end
-function SemialgebraicSets.gröbnerbasis!(::AbstractVector{<:MP.APL}, ::DummyAlgo)
-    error("Dummy algo")
+function SemialgebraicSets.gröbnerbasis!(
+    ::AbstractVector{<:MP.APL},
+    ::DummyAlgo,
+)
+    return error("Dummy algo")
 end
 
 struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
@@ -15,7 +18,7 @@ function SemialgebraicSets.solvealgebraicequations(
     ::SemialgebraicSets.AlgebraicSet,
     ::DummySolver,
 )
-    error("Dummy solver")
+    return error("Dummy solver")
 end
 
 function algo_and_solver_test(func)
