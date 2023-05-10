@@ -18,12 +18,12 @@ struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
         @test S.V isa AlgebraicSet{Rational{BigInt}}
         @test sprint(show, S.V) == "{ (x, y) | -y + x = 0, -y + x^2 = 0 }"
         @test sprint(show, MIME"text/plain"(), S.V) == "Algebraic Set defined by 2 equalities\n -y + x = 0\n -y + x^2 = 0\n"
-        @test S === MultivariatePolynomials.changecoefficienttype(S, Rational{BigInt})
-        @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Rational{BigInt})
+        @test S === similar(S, Rational{BigInt})
+        @test S.V === similar(S.V, Rational{BigInt})
         @test S.V.I === convert(typeof(S.V.I), S.V.I)
-        @test BasicSemialgebraicSet{Int, polynomialtype(x, Int)}() isa BasicSemialgebraicSet{Rational{BigInt}, polynomialtype(x, Rational{BigInt})}
+        @test BasicSemialgebraicSet{Int, polynomial_type(x, Int)}() isa BasicSemialgebraicSet{Rational{BigInt}, polynomial_type(x, Rational{BigInt})}
         @test Int32(2)*x^2*y isa MultivariatePolynomials.AbstractTerm{Int32}
-        Sf = MultivariatePolynomials.changecoefficienttype(S, Float32)
+        Sf = similar(S, Float32)
         @test Sf isa BasicSemialgebraicSet{Float32}
         @test Sf.V isa AlgebraicSet{Float32}
 
@@ -63,9 +63,9 @@ Basic semialgebraic Set defined by no equality
 Algebraic Set defined by no equality
 """
         @test S isa BasicSemialgebraicSet{Int}
-        @test S === MultivariatePolynomials.changecoefficienttype(S, Int)
+        @test S === similar(S, Int)
         @test S.V isa FullSpace
-        Sf = MultivariatePolynomials.changecoefficienttype(S, Float64)
+        Sf = similar(S, Float64)
         @test Sf isa BasicSemialgebraicSet{Float64}
         @test Sf.V isa FullSpace
 
@@ -73,7 +73,7 @@ Algebraic Set defined by no equality
         @test S.V ∩ FullSpace() === S.V
         @test FullSpace() ∩ S  === S
         @test FullSpace() ∩ S.V  === S.V
-        @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Float64)
+        @test S.V === similar(S.V, Float64)
     end
     @testset "Basic with fixed variables" begin
         S = @set x == 1 && x ≤ x^2
@@ -86,10 +86,10 @@ Algebraic Set defined by no equality
         @test S isa BasicSemialgebraicSet{Int}
         @test S.V isa FixedVariablesSet{<:AbstractVariable, Int}
         @test rem(x + y, ideal(S.V)) == 3
-        @test S === MultivariatePolynomials.changecoefficienttype(S, Int)
-        @test S.V === MultivariatePolynomials.changecoefficienttype(S.V, Int)
+        @test S === similar(S, Int)
+        @test S.V === similar(S.V, Int)
         @test S.V.ideal === convert(typeof(S.V.ideal), S.V.ideal)
-        Sf = MultivariatePolynomials.changecoefficienttype(S, Float64)
+        Sf = similar(S, Float64)
         @test Sf isa BasicSemialgebraicSet{Float64}
         @test Sf.V isa FixedVariablesSet{<:AbstractVariable, Float64}
         @test rem(x + y, ideal(Sf.V)) == 3
@@ -98,7 +98,7 @@ Algebraic Set defined by no equality
         @test S isa BasicSemialgebraicSet{Int}
         @test S.V isa FixedVariablesSet{<:AbstractVariable, Int}
         @test rem(x + y, ideal(S.V)) == 3
-        Sf = MultivariatePolynomials.changecoefficienttype(S, Float64)
+        Sf = similar(S, Float64)
         @test Sf isa BasicSemialgebraicSet{Float64}
         @test Sf.V isa FixedVariablesSet{<:AbstractVariable, Float64}
         @test rem(x + y, ideal(Sf.V)) == 3

@@ -37,7 +37,7 @@ end
 struct FixedVariablesSet{V, T, MT} <: AbstractAlgebraicSet
     ideal::FixedVariablesIdeal{V, T, MT}
 end
-MP.changecoefficienttype(::Type{FixedVariablesSet{V, S, MT}}, T::Type) where {V, S, MT} = FixedVariablesSet{V, T, MT}
+MP.similar_type(::Type{FixedVariablesSet{V, S, MT}}, T::Type) where {V, S, MT} = FixedVariablesSet{V, T, MT}
 function Base.convert(::Type{FixedVariablesSet{V, T, MT}}, set::FixedVariablesSet{V, T, MT}) where {V, T, MT}
     return set
 end
@@ -56,7 +56,7 @@ function nequalities(set::FixedVariablesSet)
 end
 function equalities(set::FixedVariablesSet{V, T, MT}) where {V, T, MT}
     if set.ideal.substitutions === nothing
-        return [constantterm(one(T), MT)]
+        return [constant_term(one(T), MT)]
     else
         return [key - value for (key, value) in set.ideal.substitutions]
     end

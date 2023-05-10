@@ -23,7 +23,7 @@ function PolynomialIdeal{T, PT}(p::Vector{PT}, algo::A) where {T, PT<:APL{T}, A<
 end
 function PolynomialIdeal(p::Vector{PT}, algo) where {T, PT<:APL{T}}
     S = promote_for_division(T)
-    PolynomialIdeal{S, polynomialtype(PT, S)}(AbstractVector{polynomialtype(PT, S)}(p), algo)
+    PolynomialIdeal{S, polynomial_type(PT, S)}(AbstractVector{polynomial_type(PT, S)}(p), algo)
 end
 function PolynomialIdeal{T, PT}() where {T, PT<:APL{T}}
     PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(PT))
@@ -57,10 +57,10 @@ end
 function monomialbasis(I, vars=variables(I))
     computegröbnerbasis!(I)
     if isempty(I.p)
-        return false, monomialtype(eltype(I.p))[]
+        return false, monomial_type(eltype(I.p))[]
     end
-    mv = monovec(leadingmonomial.(I.p))
-    # monovec makes sure all monomials have the same variables
+    mv = monomial_vector(leading_monomial.(I.p))
+    # monomial_vector makes sure all monomials have the same variables
     # if x_i^n is in the leading monomials, lv[i] <= n
     lv = -ones(Int, length(vars))
     for m in mv
@@ -75,7 +75,7 @@ function monomialbasis(I, vars=variables(I))
         end
     end
     if any(lv .< 0)
-        return false, monomialtype(eltype(I.p))[]
+        return false, monomial_type(eltype(I.p))[]
     end
     return true, monomials(vars, 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
 end

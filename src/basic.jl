@@ -20,7 +20,7 @@ function basicsemialgebraicset(V, p)
     BasicSemialgebraicSet(V, p)
 end
 
-MP.changecoefficienttype(::Type{BasicSemialgebraicSet{S, PS, AT}}, T::Type) where {S, PS, AT} = BasicSemialgebraicSet{T, MP.changecoefficienttype(PS, T), MP.changecoefficienttype(AT, T)}
+MP.similar_type(::Type{BasicSemialgebraicSet{S, PS, AT}}, T::Type) where {S, PS, AT} = BasicSemialgebraicSet{T, MP.similar_type(PS, T), MP.similar_type(AT, T)}
 
 function Base.convert(::Type{BasicSemialgebraicSet{T, PT, AT}}, set::BasicSemialgebraicSet) where {T, PT, AT}
     return BasicSemialgebraicSet{T, PT, AT}(set.V, set.p)
