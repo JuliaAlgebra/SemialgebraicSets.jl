@@ -70,10 +70,29 @@ function compute_gröbner_basis!(I::PolynomialIdeal)
         I.gröbner_basis = true
     end
 end
+
+"""
+    standard_monomials(I::AbstractPolynomialIdeal, vars = variables(I))
+
+Return the vector of *standard monomials* in the variables `var` of the ideal
+`I`. A monomial is a *standard monomial* if it is not the leading monomial of
+any polynomial of the ideal. If there are infinitely such monomials, `nothing`
+is returned.
+
+See [CLO5, p. 38], where it is also called *basis monomial*, for more
+information.
+
+[CLO05] Cox, A. David & Little, John & O'Shea, Donal
+*Using Algebraic Geometry*.
+Graduate Texts in Mathematics, **2005**.
+https://doi.org/10.1007/b138611
+"""
+function standard_monomials end
+
 function standard_monomials(I, vars = variables(I))
     compute_gröbner_basis!(I)
     if isempty(I.p)
-        return false, monomial_type(eltype(I.p))[]
+        return nothing # Nonzero dimensional
     end
     mv = monomial_vector(leading_monomial.(I.p))
     # monomial_vector makes sure all monomials have the same variables
@@ -90,9 +109,8 @@ function standard_monomials(I, vars = variables(I))
             end
         end
     end
-    if any(lv .< 0)
-        return false, monomial_type(eltype(I.p))[]
+    if any(Base.Fix2(<, 0), lv)
+        return nothing # Nonzero dimensional
     end
-    return true,
-    monomials(vars, 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
+    return monomials(vars, 0:(sum(lv)-1), m -> !any(Base.Fix2(divides, m), mv))
 end

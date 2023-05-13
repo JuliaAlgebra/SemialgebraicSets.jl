@@ -72,11 +72,11 @@ end
 
 function multiplication_matrices(
     V,
-    algo::GröbnerBasisMultiplicationMatricesAlgorithm,
+    ::GröbnerBasisMultiplicationMatricesAlgorithm,
 )
     vars = variables(V.I)
-    iszd, B = standard_monomials(V.I, vars)
-    if !iszd
+    B = standard_monomials(V.I, vars)
+    if isnothing(B)
         return
     else
         n = length(vars)
