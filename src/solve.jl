@@ -1,4 +1,4 @@
-export algebraicsolver, ReorderedSchurMultiplicationMatricesSolver
+export algebraic_solver, ReorderedSchurMultiplicationMatricesSolver
 
 """
     AbstractAlgebraicSolver
@@ -75,7 +75,7 @@ function multiplication_matrices(
     algo::GröbnerBasisMultiplicationMatricesAlgorithm,
 )
     vars = variables(V.I)
-    iszd, B = monomial_basis(V.I, vars)
+    iszd, B = standard_monomials(V.I, vars)
     if !iszd
         return
     else

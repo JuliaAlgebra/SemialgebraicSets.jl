@@ -165,7 +165,7 @@ end
     V =
         @set x^2 + y^2 == 1 && x^3 + (2 + z) * x * y + y^3 == 1 && z^2 == 2 solver
     @test is_zero_dimensional(V)
-    iszd, B = monomial_basis(V.I)
+    iszd, B = standard_monomials(V.I)
     @test iszd
     @test B == [
         y^3 * z,

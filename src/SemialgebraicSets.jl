@@ -65,4 +65,6 @@ include("basic.jl")
 include("fix.jl")
 include("macro.jl")
 
+include("deprecate.jl")
+
 end # module

@@ -1,12 +1,12 @@
-export monomial_basis, ideal
+export standard_monomials, ideal
 
 abstract type AbstractPolynomialIdeal end
 
 struct EmptyPolynomialIdeal <: AbstractPolynomialIdeal end
-function ideal(p::FullSpace, algo = default_gröbner_basis_algorithm(p))
+function ideal(p::FullSpace, _ = default_gröbner_basis_algorithm(p))
     return EmptyPolynomialIdeal()
 end
-Base.rem(p::AbstractPolynomialLike, I::EmptyPolynomialIdeal) = p
+Base.rem(p::AbstractPolynomialLike, ::EmptyPolynomialIdeal) = p
 
 promote_for_division(::Type{T}) where {T} = T
 promote_for_division(::Type{T}) where {T<:Integer} = Rational{big(T)}
@@ -70,7 +70,7 @@ function compute_gröbner_basis!(I::PolynomialIdeal)
         I.gröbner_basis = true
     end
 end
-function monomial_basis(I, vars = variables(I))
+function standard_monomials(I, vars = variables(I))
     compute_gröbner_basis!(I)
     if isempty(I.p)
         return false, monomial_type(eltype(I.p))[]
