@@ -111,15 +111,15 @@ function Base.intersect(
     return FixedVariablesSet(ideal)
 end
 function Base.intersect(V::AlgebraicSet, W::FixedVariablesSet)
-    return V ∩ algebraicset(W)
+    return V ∩ algebraic_set(W)
 end
 function Base.intersect(V::FixedVariablesSet, W::AlgebraicSet)
     # Need `W` to be first so that the intersection uses its solver.
-    # and not the default one taken in `algebraicset(W)`.
+    # and not the default one taken in `algebraic_set(W)`.
     return W ∩ V
 end
 
-iszerodimensional(::FixedVariablesSet) = true
+is_zero_dimensional(::FixedVariablesSet) = true
 function Base.isempty(V::FixedVariablesSet)
     return generate_nonzero_constant(V.ideal)
 end

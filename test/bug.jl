@@ -8,8 +8,8 @@ function test(ztol = Base.rtoldefault(Float64))
         library = Buchberger(ztol)
     )
     for i in 1:n
-        addequality!(I, W[i] - W[i]^2)
+        add_equality!(I, W[i] - W[i]^2)
     end
-    SemialgebraicSets.computegröbnerbasis!(I.I)
+    SemialgebraicSets.compute_gröbner_basis!(I.I)
     return I
 end

@@ -1,20 +1,20 @@
-export iszerodimensional
-export algebraicset, projectivealgebraicset, equalities
+export is_zero_dimensional
+export algebraic_set, projective_algebraic_set, equalities
 
 struct DefaultAlgebraicSetLibrary{S<:AbstractAlgebraicSolver}
     solver::S
 end
 
-function defaultalgebraicsetlibrary(
+function default_algebraic_set_library(
     ::Vector{<:APL},
     solver::AbstractAlgebraicSolver,
 )
     return DefaultAlgebraicSetLibrary(solver)
 end
-function defaultalgebraicsetlibrary(p::Vector{<:APL}, solveroralgo...)
-    return defaultalgebraicsetlibrary(
+function default_algebraic_set_library(p::Vector{<:APL}, solveroralgo...)
+    return default_algebraic_set_library(
         p,
-        defaultalgebraicsolver(p, solveroralgo...),
+        default_algebraic_solver(p, solveroralgo...),
     )
 end
 
@@ -23,8 +23,8 @@ mutable struct AlgebraicSet{T,PT<:APL{T},A,S<:AbstractAlgebraicSolver,U} <:
     I::PolynomialIdeal{T,PT,A}
     projective::Bool
     elements::Vector{Vector{U}}
-    elementscomputed::Bool
-    iszerodimensional::Bool
+    elements_computed::Bool
+    is_zero_dimensional::Bool
     solver::S
 end
 function AlgebraicSet{T,PT,A,S,U}(
@@ -37,7 +37,7 @@ function AlgebraicSet(I::PolynomialIdeal{T,PT,A}, solver::S) where {T,PT,A,S}
     return AlgebraicSet{T,PT,A,S,float(T)}(I, solver)
 end
 function AlgebraicSet{T,PT}() where {T,PT}
-    return AlgebraicSet(PolynomialIdeal{T,PT}(), defaultalgebraicsolver(T))
+    return AlgebraicSet(PolynomialIdeal{T,PT}(), default_algebraic_solver(T))
 end
 function AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver)
     return AlgebraicSet(ideal(p, algo), solver)
@@ -63,57 +63,57 @@ function Base.convert(
         set.I,
         set.projective,
         set.elements,
-        set.elementscomputed,
-        set.iszerodimensional,
+        set.elements_computed,
+        set.is_zero_dimensional,
         set.solver,
     )
 end
 
-function algebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary)
-    return AlgebraicSet(p, defaultgröbnerbasisalgorithm(p), lib.solver)
+function algebraic_set(p::Vector, lib::DefaultAlgebraicSetLibrary)
+    return AlgebraicSet(p, default_gröbner_basis_algorithm(p), lib.solver)
 end
-function algebraicset(
+function algebraic_set(
     p::Vector,
-    algo::AbstractGröbnerBasisAlgorithm = defaultgröbnerbasisalgorithm(p),
-    lib::DefaultAlgebraicSetLibrary = defaultalgebraicsetlibrary(p),
+    algo::AbstractGröbnerBasisAlgorithm = default_gröbner_basis_algorithm(p),
+    lib::DefaultAlgebraicSetLibrary = default_algebraic_set_library(p),
 )
     return AlgebraicSet(p, algo, lib.solver)
 end
-function algebraicset(p::Vector, solver)
-    return algebraicset(p, defaultalgebraicsetlibrary(p, solver))
+function algebraic_set(p::Vector, solver)
+    return algebraic_set(p, default_algebraic_set_library(p, solver))
 end
-function algebraicset(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver)
-    return algebraicset(p, algo, defaultalgebraicsetlibrary(p, solver))
+function algebraic_set(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver)
+    return algebraic_set(p, algo, default_algebraic_set_library(p, solver))
 end
 
-function projectivealgebraicset(p::Vector, lib::DefaultAlgebraicSetLibrary)
-    return projectivealgebraicset(
+function projective_algebraic_set(p::Vector, lib::DefaultAlgebraicSetLibrary)
+    return projective_algebraic_set(
         p,
-        defaultgröbnerbasisalgorithm(p),
+        default_gröbner_basis_algorithm(p),
         lib.solver,
     )
 end
-function projectivealgebraicset(
+function projective_algebraic_set(
     p::Vector,
-    algo::AbstractGröbnerBasisAlgorithm = defaultgröbnerbasisalgorithm(p),
-    lib::DefaultAlgebraicSetLibrary = defaultalgebraicsetlibrary(p),
+    algo::AbstractGröbnerBasisAlgorithm = default_gröbner_basis_algorithm(p),
+    lib::DefaultAlgebraicSetLibrary = default_algebraic_set_library(p),
 )
     V = AlgebraicSet(p, algo, lib.solver)
     V.projective = true
     return V
 end
-function projectivealgebraicset(p::Vector, algo, solver)
-    return projectivealgebraicset(
+function projective_algebraic_set(p::Vector, algo, solver)
+    return projective_algebraic_set(
         p,
         algo,
-        defaultalgebraicsetlibrary(p, solver),
+        default_algebraic_set_library(p, solver),
     )
 end
-function projectivealgebraicset(p::Vector, solver)
-    return projectivealgebraicset(
+function projective_algebraic_set(p::Vector, solver)
+    return projective_algebraic_set(
         p,
-        defaultgröbnerbasisalgorithm(p),
-        defaultalgebraicsetlibrary(p, solver),
+        default_gröbner_basis_algorithm(p),
+        default_algebraic_set_library(p, solver),
     )
 end
 
@@ -122,13 +122,13 @@ ideal(V::AlgebraicSet) = V.I
 MP.variables(V::AlgebraicSet) = MP.variables(V.I)
 nequalities(V::AlgebraicSet) = length(V.I.p)
 equalities(V::AlgebraicSet) = V.I.p
-addequality!(V::AlgebraicSet, p) = push!(V.I.p, p)
+add_equality!(V::AlgebraicSet, p) = push!(V.I.p, p)
 function Base.intersect(S::AlgebraicSet, T::AlgebraicSet)
     return AlgebraicSet(S.I + T.I, S.solver)
 end
 
-function algebraicset(set::AbstractAlgebraicSet, solver...)
-    return algebraicset(equalities(set), solver...)
+function algebraic_set(set::AbstractAlgebraicSet, solver...)
+    return algebraic_set(equalities(set), solver...)
 end
 function Base.show(io::IO, V::AbstractAlgebraicSet)
     return print(
@@ -157,7 +157,7 @@ function Base.show(io::IO, mime::MIME"text/plain", V::AbstractAlgebraicSet)
     return _show_els(io, "equalit", nequalities(V), equalities(V), "=")
 end
 
-defaultalgebraicsolver(V::AlgebraicSet) = V.solver
+default_algebraic_solver(V::AlgebraicSet) = V.solver
 function elements(V::AlgebraicSet{T,PT,A,S,U}) where {T,PT,A,S,U}
     if V.projective
         I = V.I
@@ -171,24 +171,24 @@ function elements(V::AlgebraicSet{T,PT,A,S,U}) where {T,PT,A,S,U}
             append!(els, els1)
             I = I + ideal([v], V.I.algo)
         end
-        els
+        return els
     else
-        solvealgebraicequations(V, V.solver)
+        return solve(V, V.solver)
     end
 end
-function computeelements!(V::AlgebraicSet{T}) where {T}
-    if !V.elementscomputed
+function compute_elements!(V::AlgebraicSet{T}) where {T}
+    if !V.elements_computed
         els = elements(V)
-        V.iszerodimensional = els !== nothing
-        if V.iszerodimensional
+        V.is_zero_dimensional = els !== nothing
+        if V.is_zero_dimensional
             V.elements = els
         end
-        V.elementscomputed = true
+        V.elements_computed = true
     end
 end
-function iszerodimensional(V::AlgebraicSet)
-    computeelements!(V)
-    return V.iszerodimensional
+function is_zero_dimensional(V::AlgebraicSet)
+    compute_elements!(V)
+    return V.is_zero_dimensional
 end
 
 Base.eltype(V::AlgebraicSet{T,PT,A,S,U}) where {T,PT,A,S,U} = Vector{U}
@@ -196,8 +196,8 @@ Base.eltype(V::AlgebraicSet{T,PT,A,S,U}) where {T,PT,A,S,U} = Vector{U}
 for f in [:length, :iterate, :lastindex, :getindex]
     @eval begin
         function Base.$f(V::AlgebraicSet, args...)
-            computeelements!(V)
-            if !iszerodimensional(V)
+            compute_elements!(V)
+            if !is_zero_dimensional(V)
                 error("A non zero-dimensional algebraic set is not iterable")
             end
             return $f(V.elements, args...)

@@ -1,5 +1,5 @@
-export spolynomial, gröbnerbasis, groebnerbasis
-export Buchberger, presort!, dummyselection, normalselection
+export spolynomial, gröbner_basis, groebner_basis
+export Buchberger, presort!, dummy_selection, normal_selection
 
 """
     spolynomial(p::AbstractPolynomialLike, q::AbstractPolynomialLike)
@@ -23,7 +23,7 @@ function spolynomial(p::APL, q::APL)
     return MA.operate!!(-, ad, bd)
 end
 
-function reducebasis!(F::AbstractVector{<:APL}; kwargs...)
+function reduce_basis!(F::AbstractVector{<:APL}; kwargs...)
     changed = true
     while changed
         changed = false
@@ -78,7 +78,7 @@ end
 
 # Selection of (i, j) ∈ B
 
-function dummyselection(F, B)
+function dummy_selection(F, B)
     return first(B)
 end
 # "BUCHBERGER (1985) suggests that there will often be some savings if we pick
@@ -91,7 +91,7 @@ end
 #
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition p. 116
-function normalselection(F, B)
+function normal_selection(F, B)
     best = first(B)
     m = lcmlm(F, best...)
     for (i, j) in Iterators.drop(B, 1)
@@ -105,7 +105,7 @@ function normalselection(F, B)
 end
 # TODO sugar and double sugar selections
 
-defaultgröbnerbasisalgorithm(p) = Buchberger()
+default_gröbner_basis_algorithm(p) = Buchberger()
 abstract type AbstractGröbnerBasisAlgorithm end
 
 struct Buchberger <: AbstractGröbnerBasisAlgorithm
@@ -113,17 +113,17 @@ struct Buchberger <: AbstractGröbnerBasisAlgorithm
     pre!::Function
     sel::Function
 end
-#Buchberger() = Buchberger(presort!, dummyselection)
+#Buchberger() = Buchberger(presort!, dummy_selection)
 function Buchberger(ztol = Base.rtoldefault(Float64))
-    return Buchberger(ztol, presort!, normalselection)
+    return Buchberger(ztol, presort!, normal_selection)
 end
 
 # Taken from Theorem 9 of
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition
-function gröbnerbasis!(
+function gröbner_basis!(
     F::AbstractVector{<:APL},
-    algo = defaultgröbnerbasisalgorithm(F),
+    algo = default_gröbner_basis_algorithm(F),
 )
     algo.pre!(F)
     B = Set{NTuple{2,Int}}(
@@ -150,12 +150,12 @@ function gröbnerbasis!(
         end
         delete!(B, (i, j))
     end
-    reducebasis!(F; ztol = algo.ztol)
+    reduce_basis!(F; ztol = algo.ztol)
     map!(monic, F, F)
     return F
 end
-function gröbnerbasis(F::Vector{<:APL}, args...)
+function gröbner_basis(F::Vector{<:APL}, args...)
     T = Base.promote_op(rem, eltype(F), typeof(F))
-    return gröbnerbasis!(copyto!(similar(F, T), F), args...)
+    return gröbner_basis!(copyto!(similar(F, T), F), args...)
 end
-const groebnerbasis = gröbnerbasis
+const groebner_basis = gröbner_basis

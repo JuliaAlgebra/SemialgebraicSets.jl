@@ -15,9 +15,9 @@ function equality(lhs, rhs)
 end
 function Base.intersect(eq::PolynomialEquality; lib_or_solver = nothing)
     if lib_or_solver === nothing
-        return algebraicset([eq.p])
+        return algebraic_set([eq.p])
     else
-        return algebraicset([eq.p], lib_or_solver)
+        return algebraic_set([eq.p], lib_or_solver)
     end
 end
 

@@ -1,12 +1,12 @@
-export monomialbasis, ideal
+export standard_monomials, ideal
 
 abstract type AbstractPolynomialIdeal end
 
 struct EmptyPolynomialIdeal <: AbstractPolynomialIdeal end
-function ideal(p::FullSpace, algo = defaultgröbnerbasisalgorithm(p))
+function ideal(p::FullSpace, _ = default_gröbner_basis_algorithm(p))
     return EmptyPolynomialIdeal()
 end
-Base.rem(p::AbstractPolynomialLike, I::EmptyPolynomialIdeal) = p
+Base.rem(p::AbstractPolynomialLike, ::EmptyPolynomialIdeal) = p
 
 promote_for_division(::Type{T}) where {T} = T
 promote_for_division(::Type{T}) where {T<:Integer} = Rational{big(T)}
@@ -18,7 +18,7 @@ end
 mutable struct PolynomialIdeal{T,PT<:APL{T},A<:AbstractGröbnerBasisAlgorithm} <:
                AbstractPolynomialIdeal
     p::Vector{PT}
-    gröbnerbasis::Bool
+    gröbner_basis::Bool
     algo::A
 end
 function PolynomialIdeal{T,PT}(
@@ -35,7 +35,7 @@ function PolynomialIdeal(p::Vector{PT}, algo) where {T,PT<:APL{T}}
     )
 end
 function PolynomialIdeal{T,PT}() where {T,PT<:APL{T}}
-    return PolynomialIdeal(PT[], defaultgröbnerbasisalgorithm(PT))
+    return PolynomialIdeal(PT[], default_gröbner_basis_algorithm(PT))
 end
 
 function Base.convert(
@@ -48,10 +48,10 @@ function Base.convert(
     ::Type{PolynomialIdeal{T,PT,A}},
     I::PolynomialIdeal,
 ) where {T,PT,A}
-    return PolynomialIdeal{T,PT,A}(I.p, I.gröbnerbasis, I.algo)
+    return PolynomialIdeal{T,PT,A}(I.p, I.gröbner_basis, I.algo)
 end
 
-ideal(p, algo = defaultgröbnerbasisalgorithm(p)) = PolynomialIdeal(p, algo)
+ideal(p, algo = default_gröbner_basis_algorithm(p)) = PolynomialIdeal(p, algo)
 
 function Base.:+(I::PolynomialIdeal, J::PolynomialIdeal)
     return PolynomialIdeal([I.p; J.p], I.algo)
@@ -60,20 +60,39 @@ end
 MP.variables(I::PolynomialIdeal) = variables(I.p)
 
 function Base.rem(p::AbstractPolynomialLike, I::PolynomialIdeal)
-    computegröbnerbasis!(I)
+    compute_gröbner_basis!(I)
     return rem(p, I.p)
 end
 
-function computegröbnerbasis!(I::PolynomialIdeal)
-    if !I.gröbnerbasis
-        gröbnerbasis!(I.p, I.algo)
-        I.gröbnerbasis = true
+function compute_gröbner_basis!(I::PolynomialIdeal)
+    if !I.gröbner_basis
+        gröbner_basis!(I.p, I.algo)
+        I.gröbner_basis = true
     end
 end
-function monomialbasis(I, vars = variables(I))
-    computegröbnerbasis!(I)
+
+"""
+    standard_monomials(I::AbstractPolynomialIdeal, vars = variables(I))
+
+Return the vector of *standard monomials* in the variables `var` of the ideal
+`I`. A monomial is a *standard monomial* if it is not the leading monomial of
+any polynomial of the ideal. If there are infinitely such monomials, `nothing`
+is returned.
+
+See [CLO5, p. 38], where it is also called *basis monomial*, for more
+information.
+
+[CLO05] Cox, A. David & Little, John & O'Shea, Donal
+*Using Algebraic Geometry*.
+Graduate Texts in Mathematics, **2005**.
+https://doi.org/10.1007/b138611
+"""
+function standard_monomials end
+
+function standard_monomials(I, vars = variables(I))
+    compute_gröbner_basis!(I)
     if isempty(I.p)
-        return false, monomial_type(eltype(I.p))[]
+        return nothing # Nonzero dimensional
     end
     mv = monomial_vector(leading_monomial.(I.p))
     # monomial_vector makes sure all monomials have the same variables
@@ -90,9 +109,8 @@ function monomialbasis(I, vars = variables(I))
             end
         end
     end
-    if any(lv .< 0)
-        return false, monomial_type(eltype(I.p))[]
+    if any(Base.Fix2(<, 0), lv)
+        return nothing # Nonzero dimensional
     end
-    return true,
-    monomials(vars, 0:(sum(lv)-1), m -> !any(map(m2 -> divides(m2, m), mv)))
+    return monomials(vars, 0:(sum(lv)-1), m -> !any(Base.Fix2(divides, m), mv))
 end
