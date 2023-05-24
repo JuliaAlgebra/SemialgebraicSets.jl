@@ -125,9 +125,6 @@ function _solve_multiplication_matrices(
     @assert length(Ms) == length(λ)
     n = length(λ)
     Z, clusters = clusterordschur(sum(λ .* Ms), solver.ɛ)
-    for i in 1:n
-        display(Z' * Ms[i] * Z)
-    end
     r = length(clusters)
     vals = [zeros(T, n) for k in 1:r]
     for k in 1:r
