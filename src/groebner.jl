@@ -106,7 +106,14 @@ end
 # TODO sugar and double sugar selections
 
 default_gröbner_basis_algorithm(p) = Buchberger()
+
 abstract type AbstractGröbnerBasisAlgorithm end
+
+function promote_for end
+
+struct NoAlgorithm <: AbstractGröbnerBasisAlgorithm end
+
+promote_for(::Type{T}, ::Type{NoAlgorithm}) where {T} = T
 
 struct Buchberger <: AbstractGröbnerBasisAlgorithm
     ztol::Float64
@@ -117,6 +124,15 @@ end
 function Buchberger(ztol = Base.rtoldefault(Float64))
     return Buchberger(ztol, presort!, normal_selection)
 end
+
+promote_for_division(::Type{T}) where {T} = T
+promote_for_division(::Type{T}) where {T<:Integer} = Rational{big(T)}
+promote_for_division(::Type{Rational{T}}) where {T} = Rational{big(T)}
+function promote_for_division(::Type{Complex{T}}) where {T}
+    return Complex{promote_for_division(T)}
+end
+
+promote_for(::Type{T}, ::Type{Buchberger}) where {T} = promote_for_division(T)
 
 # Taken from Theorem 9 of
 # Ideals, Varieties, and Algorithms
