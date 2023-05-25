@@ -15,7 +15,7 @@ function SemialgebraicSets.gröbner_basis!(
 end
 
 struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
-SemialgebraicSets.default_gröbner_basis_algorithm(::Any, ::DummySolver) = DummyAlgo()
+SemialgebraicSets.default_gröbner_basis_algorithm(::Any, ::DummySolver) = SemialgebraicSets.NoAlgorithm()
 SemialgebraicSets.promote_for(::Type{T}, ::Type{DummySolver}) where {T} = T
 function SemialgebraicSets.solve(
     ::SemialgebraicSets.AlgebraicSet,
@@ -38,7 +38,7 @@ function algo_and_solver_test(func)
     @test_throws ErrorException("Dummy solver") p[1] in V
     @test_throws ErrorException("Dummy algo") rem(p[1], V.I)
     V = func(p, DummySolver())
-    @test V.I.algo isa DummyAlgo
+    @test V.I.algo isa NoAlgorithm
     @test V.solver isa DummySolver
     @test eltype(V) == Vector{Int}
     @test_throws ErrorException("Dummy solver") collect(V)

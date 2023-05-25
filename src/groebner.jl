@@ -111,6 +111,10 @@ abstract type AbstractGröbnerBasisAlgorithm end
 
 function promote_for end
 
+struct NoAlgorithm <: AbstractGröbnerBasisAlgorithm end
+
+promote_for(::Type{T}, ::Type{NoAlgorithm}) where {T} = T
+
 struct Buchberger <: AbstractGröbnerBasisAlgorithm
     ztol::Float64
     pre!::Function
