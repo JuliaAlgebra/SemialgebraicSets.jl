@@ -38,7 +38,7 @@ function algo_and_solver_test(func)
     @test_throws ErrorException("Dummy solver") p[1] in V
     @test_throws ErrorException("Dummy algo") rem(p[1], V.I)
     V = func(p, DummySolver())
-    @test V.I.algo isa NoAlgorithm
+    @test V.I.algo isa SemialgebraicSets.NoAlgorithm
     @test V.solver isa DummySolver
     @test eltype(V) == Vector{Int}
     @test_throws ErrorException("Dummy solver") collect(V)
