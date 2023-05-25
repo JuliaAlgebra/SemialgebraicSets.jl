@@ -150,7 +150,12 @@ function algebraic_solver(
     return SolverUsingMultiplicationMatrices(algo, solver)
 end
 
-promote_for(::Type{T}, ::Type{<:SolverUsingMultiplicationMatrices}) where {T} = float(T)
+function promote_for(
+    ::Type{T},
+    ::Type{<:SolverUsingMultiplicationMatrices},
+) where {T}
+    return float(T)
+end
 
 function default_multiplication_matrices_algorithm(p)
     return GröbnerBasisMultiplicationMatricesAlgorithm()
@@ -186,9 +191,6 @@ function default_algebraic_solver(
     )
 end
 
-function default_algebraic_solver(
-    p,
-    ::AbstractGröbnerBasisAlgorithm,
-)
+function default_algebraic_solver(p, ::AbstractGröbnerBasisAlgorithm)
     return default_algebraic_solver(p)
 end

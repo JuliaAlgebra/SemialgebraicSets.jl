@@ -85,15 +85,30 @@ function algebraic_set(
 end
 
 function algebraic_set(p::Vector, lib::DefaultAlgebraicSetLibrary; kws...)
-    return algebraic_set(p, default_gröbner_basis_algorithm(p, lib), lib.solver; kws...)
+    return algebraic_set(
+        p,
+        default_gröbner_basis_algorithm(p, lib),
+        lib.solver;
+        kws...,
+    )
 end
 
 function algebraic_set(p::Vector, solver; kws...)
     return algebraic_set(p, default_algebraic_set_library(p, solver); kws...)
 end
 
-function algebraic_set(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver; kws...)
-    return algebraic_set(p, algo, default_algebraic_set_library(p, solver); kws...)
+function algebraic_set(
+    p::Vector,
+    algo::AbstractGröbnerBasisAlgorithm,
+    solver;
+    kws...,
+)
+    return algebraic_set(
+        p,
+        algo,
+        default_algebraic_set_library(p, solver);
+        kws...,
+    )
 end
 
 function projective_algebraic_set(p::Vector, args...)

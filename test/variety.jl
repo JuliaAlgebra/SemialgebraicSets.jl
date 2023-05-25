@@ -15,7 +15,9 @@ function SemialgebraicSets.gröbner_basis!(
 end
 
 struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
-SemialgebraicSets.default_gröbner_basis_algorithm(::Any, ::DummySolver) = SemialgebraicSets.NoAlgorithm()
+function SemialgebraicSets.default_gröbner_basis_algorithm(::Any, ::DummySolver)
+    return SemialgebraicSets.NoAlgorithm()
+end
 SemialgebraicSets.promote_for(::Type{T}, ::Type{DummySolver}) where {T} = T
 function SemialgebraicSets.solve(
     ::SemialgebraicSets.AlgebraicSet,
