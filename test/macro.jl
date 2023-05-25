@@ -1,7 +1,17 @@
-struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
+module TestMacro
 
-@testset "Basic semialgebraic set" begin
-    Mod.@polyvar x y
+using Test
+using SemialgebraicSets
+using MultivariatePolynomials
+
+struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
+function SemialgebraicSets.default_gröbner_basis_algorithm(p, ::DummySolver)
+    return SemialgebraicSets.default_gröbner_basis_algorithm(p)
+end
+SemialgebraicSets.promote_for(::Type{T}, ::Type{DummySolver}) where {T} = T
+
+function runtests()
+    Main.Mod.@polyvar x y
     @test isa(FullSpace(), FullSpace)
     V = @set x * y == 1
     @test V isa AlgebraicSet{Rational{BigInt}}
@@ -161,3 +171,7 @@ Algebraic Set defined by no equality
         end
     end
 end
+
+end
+
+TestMacro.runtests()

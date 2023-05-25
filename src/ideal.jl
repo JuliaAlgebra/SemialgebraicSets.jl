@@ -8,13 +8,6 @@ function ideal(p::FullSpace, _ = default_gröbner_basis_algorithm(p))
 end
 Base.rem(p::AbstractPolynomialLike, ::EmptyPolynomialIdeal) = p
 
-promote_for_division(::Type{T}) where {T} = T
-promote_for_division(::Type{T}) where {T<:Integer} = Rational{big(T)}
-promote_for_division(::Type{Rational{T}}) where {T} = Rational{big(T)}
-function promote_for_division(::Type{Complex{T}}) where {T}
-    return Complex{promote_for_division(T)}
-end
-
 mutable struct PolynomialIdeal{T,PT<:APL{T},A<:AbstractGröbnerBasisAlgorithm} <:
                AbstractPolynomialIdeal
     p::Vector{PT}
@@ -28,7 +21,7 @@ function PolynomialIdeal{T,PT}(
     return PolynomialIdeal{T,PT,A}(p, false, algo)
 end
 function PolynomialIdeal(p::Vector{PT}, algo) where {T,PT<:APL{T}}
-    S = promote_for_division(T)
+    S = promote_for(T, typeof(algo))
     return PolynomialIdeal{S,polynomial_type(PT, S)}(
         AbstractVector{polynomial_type(PT, S)}(p),
         algo,

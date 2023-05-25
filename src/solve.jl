@@ -7,6 +7,10 @@ Solver of algebraic equations.
 """
 abstract type AbstractAlgebraicSolver end
 
+function default_gröbner_basis_algorithm(p, ::AbstractAlgebraicSolver)
+    return default_gröbner_basis_algorithm(p)
+end
+
 """
     solvealgebraicequations(V::AbstractAlgebraicSet, algo::AbstractAlgebraicSolver)::Union{Nothing, Vector{<:Vector}}}
 
@@ -146,6 +150,8 @@ function algebraic_solver(
     return SolverUsingMultiplicationMatrices(algo, solver)
 end
 
+promote_for(::Type{T}, ::Type{<:SolverUsingMultiplicationMatrices}) where {T} = float(T)
+
 function default_multiplication_matrices_algorithm(p)
     return GröbnerBasisMultiplicationMatricesAlgorithm()
 end
@@ -178,4 +184,11 @@ function default_algebraic_solver(
         default_multiplication_matrices_algorithm(p),
         solver,
     )
+end
+
+function default_algebraic_solver(
+    p,
+    ::AbstractGröbnerBasisAlgorithm,
+)
+    return default_algebraic_solver(p)
 end

@@ -5,6 +5,10 @@ struct DefaultAlgebraicSetLibrary{S<:AbstractAlgebraicSolver}
     solver::S
 end
 
+function default_gröbner_basis_algorithm(p, lib::DefaultAlgebraicSetLibrary)
+    return default_gröbner_basis_algorithm(p, lib.solver)
+end
+
 function default_algebraic_set_library(
     ::Vector{<:APL},
     solver::AbstractAlgebraicSolver,
@@ -34,7 +38,7 @@ function AlgebraicSet{T,PT,A,S,U}(
     return AlgebraicSet{T,PT,A,S,U}(I, false, Vector{U}[], false, false, solver)
 end
 function AlgebraicSet(I::PolynomialIdeal{T,PT,A}, solver::S) where {T,PT,A,S}
-    return AlgebraicSet{T,PT,A,S,float(T)}(I, solver)
+    return AlgebraicSet{T,PT,A,S,promote_for(T, S)}(I, solver)
 end
 function AlgebraicSet{T,PT}() where {T,PT}
     return AlgebraicSet(PolynomialIdeal{T,PT}(), default_algebraic_solver(T))
@@ -69,52 +73,31 @@ function Base.convert(
     )
 end
 
-function algebraic_set(p::Vector, lib::DefaultAlgebraicSetLibrary)
-    return AlgebraicSet(p, default_gröbner_basis_algorithm(p), lib.solver)
-end
 function algebraic_set(
     p::Vector,
     algo::AbstractGröbnerBasisAlgorithm = default_gröbner_basis_algorithm(p),
-    lib::DefaultAlgebraicSetLibrary = default_algebraic_set_library(p),
+    lib::DefaultAlgebraicSetLibrary = default_algebraic_set_library(p, algo);
+    projective::Bool = false,
 )
-    return AlgebraicSet(p, algo, lib.solver)
-end
-function algebraic_set(p::Vector, solver)
-    return algebraic_set(p, default_algebraic_set_library(p, solver))
-end
-function algebraic_set(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver)
-    return algebraic_set(p, algo, default_algebraic_set_library(p, solver))
+    set = AlgebraicSet(p, algo, lib.solver)
+    set.projective = projective
+    return set
 end
 
-function projective_algebraic_set(p::Vector, lib::DefaultAlgebraicSetLibrary)
-    return projective_algebraic_set(
-        p,
-        default_gröbner_basis_algorithm(p),
-        lib.solver,
-    )
+function algebraic_set(p::Vector, lib::DefaultAlgebraicSetLibrary; kws...)
+    return algebraic_set(p, default_gröbner_basis_algorithm(p, lib), lib.solver; kws...)
 end
-function projective_algebraic_set(
-    p::Vector,
-    algo::AbstractGröbnerBasisAlgorithm = default_gröbner_basis_algorithm(p),
-    lib::DefaultAlgebraicSetLibrary = default_algebraic_set_library(p),
-)
-    V = AlgebraicSet(p, algo, lib.solver)
-    V.projective = true
-    return V
+
+function algebraic_set(p::Vector, solver; kws...)
+    return algebraic_set(p, default_algebraic_set_library(p, solver); kws...)
 end
-function projective_algebraic_set(p::Vector, algo, solver)
-    return projective_algebraic_set(
-        p,
-        algo,
-        default_algebraic_set_library(p, solver),
-    )
+
+function algebraic_set(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver; kws...)
+    return algebraic_set(p, algo, default_algebraic_set_library(p, solver); kws...)
 end
-function projective_algebraic_set(p::Vector, solver)
-    return projective_algebraic_set(
-        p,
-        default_gröbner_basis_algorithm(p),
-        default_algebraic_set_library(p, solver),
-    )
+
+function projective_algebraic_set(p::Vector, args...)
+    return algebraic_set(p, args...; projective = true)
 end
 
 ideal(V::AlgebraicSet) = V.I
