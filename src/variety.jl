@@ -10,19 +10,19 @@ function default_gröbner_basis_algorithm(p, lib::DefaultAlgebraicSetLibrary)
 end
 
 function default_algebraic_set_library(
-    ::Vector{<:APL},
+    ::Vector{<:_APL},
     solver::AbstractAlgebraicSolver,
 )
     return DefaultAlgebraicSetLibrary(solver)
 end
-function default_algebraic_set_library(p::Vector{<:APL}, solveroralgo...)
+function default_algebraic_set_library(p::Vector{<:_APL}, solveroralgo...)
     return default_algebraic_set_library(
         p,
         default_algebraic_solver(p, solveroralgo...),
     )
 end
 
-mutable struct AlgebraicSet{T,PT<:APL{T},A,S<:AbstractAlgebraicSolver,U} <:
+mutable struct AlgebraicSet{T,PT<:_APL{T},A,S<:AbstractAlgebraicSolver,U} <:
                AbstractAlgebraicSet
     I::PolynomialIdeal{T,PT,A}
     projective::Bool
@@ -56,7 +56,7 @@ end
 function Base.convert(
     ::Type{AlgebraicSet{T,PT,A,S,U}},
     set::AlgebraicSet{T,PT,A,S,U},
-) where {T,PT<:APL{T},A,S<:AbstractAlgebraicSolver,U}
+) where {T,PT<:_APL{T},A,S<:AbstractAlgebraicSolver,U}
     return set
 end
 function Base.convert(

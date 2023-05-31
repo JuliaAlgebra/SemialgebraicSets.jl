@@ -165,7 +165,7 @@ function default_multiplication_matrices_solver(::Type{T}) where {T}
 end
 function default_multiplication_matrices_solver(
     ::AbstractVector{PT},
-) where {T,PT<:APL{T}}
+) where {T,PT<:_APL{T}}
     return default_multiplication_matrices_solver(T)
 end
 

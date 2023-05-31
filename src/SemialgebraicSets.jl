@@ -8,7 +8,7 @@ const MA = MutableArithmetics
 using MultivariatePolynomials
 const MP = MultivariatePolynomials
 
-const APL = AbstractPolynomialLike
+const _APL = AbstractPolynomialLike
 
 import CommonSolve: solve
 

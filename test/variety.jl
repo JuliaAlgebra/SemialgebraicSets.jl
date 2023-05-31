@@ -8,7 +8,7 @@ struct DummyAlgo <: SemialgebraicSets.AbstractGröbnerBasisAlgorithm end
 SemialgebraicSets.default_algebraic_solver(::Any, ::DummyAlgo) = DummySolver()
 SemialgebraicSets.promote_for(::Type, ::Type{DummyAlgo}) = Int
 function SemialgebraicSets.gröbner_basis!(
-    ::AbstractVector{<:MP.APL},
+    ::AbstractVector{<:MP.AbstractPolynomialLike},
     ::DummyAlgo,
 )
     return error("Dummy algo")
