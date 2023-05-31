@@ -8,8 +8,11 @@ function ideal(p::FullSpace, _ = default_gröbner_basis_algorithm(p))
 end
 Base.rem(p::AbstractPolynomialLike, ::EmptyPolynomialIdeal) = p
 
-mutable struct PolynomialIdeal{T,PT<:APL{T},A<:AbstractGröbnerBasisAlgorithm} <:
-               AbstractPolynomialIdeal
+mutable struct PolynomialIdeal{
+    T,
+    PT<:_APL{T},
+    A<:AbstractGröbnerBasisAlgorithm,
+} <: AbstractPolynomialIdeal
     p::Vector{PT}
     gröbner_basis::Bool
     algo::A
@@ -17,24 +20,24 @@ end
 function PolynomialIdeal{T,PT}(
     p::Vector{PT},
     algo::A,
-) where {T,PT<:APL{T},A<:AbstractGröbnerBasisAlgorithm}
+) where {T,PT<:_APL{T},A<:AbstractGröbnerBasisAlgorithm}
     return PolynomialIdeal{T,PT,A}(p, false, algo)
 end
-function PolynomialIdeal(p::Vector{PT}, algo) where {T,PT<:APL{T}}
+function PolynomialIdeal(p::Vector{PT}, algo) where {T,PT<:_APL{T}}
     S = promote_for(T, typeof(algo))
     return PolynomialIdeal{S,polynomial_type(PT, S)}(
         AbstractVector{polynomial_type(PT, S)}(p),
         algo,
     )
 end
-function PolynomialIdeal{T,PT}() where {T,PT<:APL{T}}
+function PolynomialIdeal{T,PT}() where {T,PT<:_APL{T}}
     return PolynomialIdeal(PT[], default_gröbner_basis_algorithm(PT))
 end
 
 function Base.convert(
     ::Type{PolynomialIdeal{T,PT,A}},
     I::PolynomialIdeal{T,PT,A},
-) where {T,PT<:APL{T},A<:AbstractGröbnerBasisAlgorithm}
+) where {T,PT<:_APL{T},A<:AbstractGröbnerBasisAlgorithm}
     return I
 end
 function Base.convert(

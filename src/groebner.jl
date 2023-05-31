@@ -10,7 +10,7 @@ S(p, q) =  \\frac{m}{\\mathrm{\\mathsc{LT}}(p)} \\cdot p - \\frac{m}{\\mathrm{\\
 ```
 where ``m = \\mathrm{lcm}(\\mathrm{\\mathsc{LM}}(p), \\mathrm{\\mathsc{LM}}(q))``.
 """
-function spolynomial(p::APL, q::APL)
+function spolynomial(p::_APL, q::_APL)
     m = lcm(leading_monomial(p), leading_monomial(q))
     ltp = leading_term(p)
     # `MA.operate` ensures that the returned value can be mutated without
@@ -23,7 +23,7 @@ function spolynomial(p::APL, q::APL)
     return MA.operate!!(-, ad, bd)
 end
 
-function reduce_basis!(F::AbstractVector{<:APL}; kwargs...)
+function reduce_basis!(F::AbstractVector{<:_APL}; kwargs...)
     changed = true
     while changed
         changed = false
@@ -138,7 +138,7 @@ promote_for(::Type{T}, ::Type{Buchberger}) where {T} = promote_for_division(T)
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition
 function gröbner_basis!(
-    F::AbstractVector{<:APL},
+    F::AbstractVector{<:_APL},
     algo = default_gröbner_basis_algorithm(F),
 )
     algo.pre!(F)
@@ -170,7 +170,7 @@ function gröbner_basis!(
     map!(monic, F, F)
     return F
 end
-function gröbner_basis(F::Vector{<:APL}, args...)
+function gröbner_basis(F::Vector{<:_APL}, args...)
     T = Base.promote_op(rem, eltype(F), typeof(F))
     return gröbner_basis!(copyto!(similar(F, T), F), args...)
 end

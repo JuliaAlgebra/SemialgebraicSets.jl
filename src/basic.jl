@@ -1,23 +1,23 @@
 export inequalities, basic_semialgebraic_set
 
-struct BasicSemialgebraicSet{T,PT<:APL{T},AT<:AbstractAlgebraicSet} <:
+struct BasicSemialgebraicSet{T,PT<:_APL{T},AT<:AbstractAlgebraicSet} <:
        AbstractBasicSemialgebraicSet
     V::AT
     p::Vector{PT}
 end
-function BasicSemialgebraicSet{T,PT}() where {T,PT<:APL{T}}
+function BasicSemialgebraicSet{T,PT}() where {T,PT<:_APL{T}}
     return BasicSemialgebraicSet(AlgebraicSet{T,PT}(), PT[])
 end
 function BasicSemialgebraicSet(
     V::AlgebraicSet{T,PT,A,S},
     p::Vector{PT},
-) where {T,PT<:APL{T},A,S<:AbstractAlgebraicSolver}
+) where {T,PT<:_APL{T},A,S<:AbstractAlgebraicSolver}
     return BasicSemialgebraicSet{T,PT,typeof(V)}(V, p)
 end
 function BasicSemialgebraicSet(
     V::AlgebraicSet{T,PT,A,SO,U},
     p::Vector{PS},
-) where {T,PT<:APL{T},S,PS<:APL{S},A,SO<:AbstractAlgebraicSolver,U}
+) where {T,PT<:_APL{T},S,PS<:_APL{S},A,SO<:AbstractAlgebraicSolver,U}
     ST = promote_type(T, S)
     PST = promote_type(PT, PS)
     return BasicSemialgebraicSet(
@@ -25,7 +25,7 @@ function BasicSemialgebraicSet(
         Vector{PST}(p),
     )
 end
-#BasicSemialgebraicSet{T, PT<:APL{T}}(V::AlgebraicSet{T, PT}, p::Vector{PT}) = BasicSemialgebraicSet{T, PT}(V, p)
+#BasicSemialgebraicSet{T, PT<:_APL{T}}(V::AlgebraicSet{T, PT}, p::Vector{PT}) = BasicSemialgebraicSet{T, PT}(V, p)
 function basic_semialgebraic_set(V, p)
     return BasicSemialgebraicSet(V, p)
 end
@@ -50,7 +50,7 @@ end
 
 function MP.variables(
     S::BasicSemialgebraicSet{T,PT,FullSpace},
-) where {T,PT<:APL{T}}
+) where {T,PT<:_APL{T}}
     return MP.variables(S.p)
 end
 function MP.variables(S::BasicSemialgebraicSet)
