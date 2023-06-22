@@ -12,6 +12,6 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 CommonSolve = "0.2"
-MultivariatePolynomials = "0.4.2"
-MutableArithmetics = "0.3.1, 1"
+MultivariatePolynomials = "0.5"
+MutableArithmetics = "1"
 julia = "1.6"
