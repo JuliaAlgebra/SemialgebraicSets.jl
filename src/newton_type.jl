@@ -1,3 +1,5 @@
+# This file is largely inspired from Bernard Mourrain's MultivariateSeries/diagonalization.jl
+
 export NewtonTypeDiagonalization
 
 # norm of off diagonal terms of a square matrix
@@ -73,7 +75,9 @@ struct NewtonTypeDiagonalization{T,RNGT} <: AbstractMultiplicationMatricesSolver
     rng::RNGT
 end
 # These were the values in MultivariateSeries/diagonalization.jl
-NewtonTypeDiagonalization(max_iter, ε, tol) = NewtonTypeDiagonalization(max_iter, ε, tol, Random.GLOBAL_RNG)
+function NewtonTypeDiagonalization(max_iter, ε, tol)
+    return NewtonTypeDiagonalization(max_iter, ε, tol, Random.GLOBAL_RNG)
+end
 NewtonTypeDiagonalization() = NewtonTypeDiagonalization(10, 1e-3, 5e-2)
 
 function _eigvecs(M::AbstractMatrix{BigFloat})

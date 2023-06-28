@@ -123,7 +123,7 @@ function projective_zero_dimensional_ideal(solver)
     testelementstypes(V, [[0, 1]])
     V = projective_algebraic_set([x + y - x])
     @test is_zero_dimensional(V)
-    testelementstypes(V, [[1, 0]])
+    return testelementstypes(V, [[1, 0]])
 end
 
 @testset "Projective zero-dimensional ideal" begin
