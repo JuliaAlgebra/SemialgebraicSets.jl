@@ -20,6 +20,7 @@ function solve(
     return _solve_multiplication_matrices(Ms.matrices, λ, solver)
 end
 
+include("cluster.jl")
 include("schur.jl")
 include("newton_type.jl")
 
