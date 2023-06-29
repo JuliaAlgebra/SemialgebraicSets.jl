@@ -4,15 +4,13 @@ export NewtonTypeDiagonalization
 
 # norm of off diagonal terms of a square matrix
 function norm_off(M)
-    if size(M[1], 1) > 1
+    n = LinearAlgebra.checksquare(M)
+    if n > 1
         return sqrt(
-            sum(
-                abs2(M[i, j]) + abs2(M[j, i]) for i in 1:size(M, 1) for
-                j in i+1:size(M, 1)
-            ),
+            sum(abs2(M[i, j]) + abs2(M[j, i]) for i in 1:n for j in i+1:n),
         )
     else
-        return 0.0
+        return zero(eltype(M))
     end
 end
 
@@ -81,12 +79,12 @@ end
 NewtonTypeDiagonalization() = NewtonTypeDiagonalization(10, 1e-3, 5e-2)
 
 function _eigvecs(M::AbstractMatrix{BigFloat})
-    ev = LinearAlgebra.schur(Float64.(M)).vectors
-    # `eigvecs` is failing some tests with a non-invertible `ev`
-    #ev = LinearAlgebra.eigvecs(Float64.(M))
+    ev = _eigvecs(Float64.(M))
     return convert(Matrix{BigFloat}, ev)
 end
-_eigvecs(M::AbstractMatrix) = LinearAlgebra.eigvecs
+# `eigvecs` is failing some tests with a non-invertible `ev`
+#_eigvecs(M::AbstractMatrix) = LinearAlgebra.eigvecs(M)
+_eigvecs(M::AbstractMatrix) = LinearAlgebra.schur(M).vectors
 
 function _solve_multiplication_matrices(M, λ, solver::NewtonTypeDiagonalization)
     @assert length(M) == length(λ)
@@ -134,4 +132,30 @@ function _solve_multiplication_matrices(M, λ, solver::NewtonTypeDiagonalization
     end
 
     return [[D[j+1][i, i] / D[1][i, i] for j in 1:n] for i in 1:r]
+
+    #    # I implemented this when I was analysing the result after only zero iteration so unsure if it's useful
+    #    d = LinearAlgebra.Diagonal(sqrt.(inv.(LinearAlgebra.diag(D[1]))))
+    #    Λ = [d * D[j+1] * d for j in 1:n]
+
+    #    # `Λ` can be decomposed into blocks corresponding to the same eigenvalue
+    #    # These blocks can have off-diagonal entries so we further diagonalize
+    #    # with
+    #    # FIXME `solver.tol` or `solver.ε` or ?
+    #    sub_solver = ReorderedSchurMultiplicationMatricesSolver(solver.ε, solver.rng)
+    #    sols = Vector{eltype(Λ[1])}[]
+    #    i = 1
+    #    while i <= r
+    #        j = findfirst((i+1):r) do j
+    #            all(1:n) do k
+    #                # FIXME `solver.tol` or `solver.ε` or ?
+    #                return !isapprox(Λ[k][j, j], Λ[k][i, i], rtol = solver.ε)
+    #            end
+    #        end
+    #        j = something(j, r - i + 1)
+    #        I = i:(i+j-1)
+    #        sub_matrices = MultiplicationMatrices([Λ[j][I, I] for j in 1:n])
+    #        append!(sols, solve(sub_matrices, sub_solver))
+    #        i += j
+    #    end
+    #    return sols
 end

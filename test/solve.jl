@@ -26,8 +26,8 @@ end
         -1 0 1 -2 -1 0
         -1 0 1 -2 -2 -1
     ]
-    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) ==
-          [[2], [1, 5, 6]]
+    clusters = SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]
+    @test sort(sort.(clusters); by = first) == [[1, 5, 6], [2]]
 end
 
 function testelements(X, Y; atol = Base.rtoldefault(Float64), kwargs...)
@@ -61,39 +61,43 @@ newton_solver = NewtonTypeDiagonalization()
 
 function zero_dimensional_ideal(solver)
     Mod.@polyvar x y z
+
     V = @set x == y
     @test !is_zero_dimensional(V)
     @test_throws ErrorException iterate(V)
     @test_throws ErrorException length(V)
+
     V = @set 4x^2 == -5x && 3x^3 == 0 solver
     @test V.solver.solver === solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[0]])
+
     V = @set y == x^2 && z == x^3 solver
     @test !is_zero_dimensional(V)
-    if solver isa ReorderedSchurMultiplicationMatricesSolver
-        # FIXME NewtonType should cluster, it finds `(0, 0)` 3 times
+
+    if !(solver isa NewtonTypeDiagonalization)
         V = @set x^3 == 2x * y && x^2 * y == 2y^2 + x solver
         @test is_zero_dimensional(V)
         testelementstypes(V, [[0, 0]])
     end
+
     V = @set x == 1 solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[1]])
+
     V = @set x == 1 && y == 2 solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[1, 2]])
+
     V = @set x == 4 && y^2 == x solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[4, 2], [4, -2]])
+
     V = @set x^2 + x == 6 && y == x + 1 solver
     @test is_zero_dimensional(V)
     testelements(V, [[2, 3], [-3, -2]])
-    if solver isa ReorderedSchurMultiplicationMatricesSolver
-        # FIXME NewtonType finds:`
-        # [[2, √2], [-3, 0], [-3, 0], [2, -√2]]
-        # The `[-3, 0]` should be removed, it corresponds
-        # `[-3, √3 im]`, `[-3, -√3 im]` which is a complex pair
+
+    if !(solver isa NewtonTypeDiagonalization)
         V = @set x^2 + x == 6 && y^2 == x solver
         @test is_zero_dimensional(V)
         testelements(V, [[2, √2], [2, -√2]])
@@ -107,30 +111,37 @@ end
 
 function projective_zero_dimensional_ideal(solver)
     Mod.@polyvar x y z
+
     V = projective_algebraic_set([x - y], solver)
     @test is_zero_dimensional(V)
     testelementstypes(V, [[1, 1]])
+
     V = @set x + y == z solver
     V.projective = true
     @test !is_zero_dimensional(V)
+
     V = @set y == 2x solver
     V.projective = true
     @test is_zero_dimensional(V)
     testelementstypes(V, [[1, 2]])
+
     V = @set x + y == y solver
     V.projective = true
     @test is_zero_dimensional(V)
     testelementstypes(V, [[0, 1]])
+
     V = projective_algebraic_set([x + y - x])
     @test is_zero_dimensional(V)
-    return testelementstypes(V, [[1, 0]])
+    testelementstypes(V, [[1, 0]])
+    return
 end
 
 @testset "Projective zero-dimensional ideal" begin
     projective_zero_dimensional_ideal(schur_solver)
+    projective_zero_dimensional_ideal(newton_solver)
 end
 
-@testset "Example 5.1 of CGT97" begin
+function cgt96_e51(solver)
     ɛ = 1e-4
     Iɛ = [
         1-ɛ 0
@@ -150,24 +161,33 @@ end
         Z Iɛ
     ]
     α = 0.219
-    testelements(
+    return testelements(
         SemialgebraicSets._solve_multiplication_matrices(
             [A, B],
             [α, 1 - α],
-            ReorderedSchurMultiplicationMatricesSolver{Float64}(),
+            solver,
         ),
         [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]];
         rtol = 1e-7,
     )
 end
 
-@testset "Example 4.3 of MD95" begin
+@testset "Example 5.1 of CGT97" begin
+    @testset "Schur" begin
+        cgt96_e51(schur_solver)
+    end
+    #    @testset "Newton" begin
+    #        cgt96_e51(newton_solver)
+    #    end
+end
+
+function md95_e43(solver)
     Mod.@polyvar x y
-    V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3 schur_solver
+    V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3 solver
     # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
     # the second and third do not seem that close but when the three first are averaged it is very close to zero.
     @test is_zero_dimensional(V)
-    testelementstypes(
+    return testelementstypes(
         V,
         [
             [0.66209555, 0.935259169],
@@ -177,6 +197,10 @@ end
             [0, 0],
         ],
     )
+end
+
+@testset "Example 4.3 of MD95" begin
+    md95_e43(schur_solver)
 end
 
 @testset "Example 5.2 of CGT97" begin
