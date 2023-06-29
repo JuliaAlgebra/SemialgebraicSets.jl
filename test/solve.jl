@@ -26,8 +26,8 @@ end
         -1 0 1 -2 -1 0
         -1 0 1 -2 -2 -1
     ]
-    @test sort.(SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]) ==
-          [[2], [1, 5, 6]]
+    clusters = SemialgebraicSets.clusterordschur(A, sqrt(eps(Float64)))[2]
+    @test sort(sort.(clusters), by = first) == [[1, 5, 6], [2]]
 end
 
 function testelements(X, Y; atol = Base.rtoldefault(Float64), kwargs...)
