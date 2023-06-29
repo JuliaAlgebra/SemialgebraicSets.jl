@@ -53,12 +53,13 @@ end
 
 # We use a fixed RNG in the tests to decrease nondeterminism. There is still nondeterminism in LAPACK though
 using Random
-solver = ReorderedSchurMultiplicationMatricesSolver(
+schur_solver = ReorderedSchurMultiplicationMatricesSolver(
     sqrt(eps(Float64)),
     MersenneTwister(0),
 )
+newton_solver = NewtonTypeDiagonalization()
 
-@testset "Zero-dimensional ideal" begin
+function zero_dimensional_ideal(solver)
     Mod.@polyvar x y z
     V = @set x == y
     @test !is_zero_dimensional(V)
@@ -70,9 +71,12 @@ solver = ReorderedSchurMultiplicationMatricesSolver(
     testelementstypes(V, [[0]])
     V = @set y == x^2 && z == x^3 solver
     @test !is_zero_dimensional(V)
-    V = @set x^3 == 2x * y && x^2 * y == 2y^2 + x solver
-    @test is_zero_dimensional(V)
-    testelementstypes(V, [[0, 0]])
+    if solver isa ReorderedSchurMultiplicationMatricesSolver
+        # FIXME NewtonType should cluster, it finds `(0, 0)` 3 times
+        V = @set x^3 == 2x * y && x^2 * y == 2y^2 + x solver
+        @test is_zero_dimensional(V)
+        testelementstypes(V, [[0, 0]])
+    end
     V = @set x == 1 solver
     @test is_zero_dimensional(V)
     testelementstypes(V, [[1]])
@@ -85,12 +89,23 @@ solver = ReorderedSchurMultiplicationMatricesSolver(
     V = @set x^2 + x == 6 && y == x + 1 solver
     @test is_zero_dimensional(V)
     testelements(V, [[2, 3], [-3, -2]])
-    V = @set x^2 + x == 6 && y^2 == x solver
-    @test is_zero_dimensional(V)
-    testelements(V, [[2, √2], [2, -√2]])
+    if solver isa ReorderedSchurMultiplicationMatricesSolver
+        # FIXME NewtonType finds:`
+        # [[2, √2], [-3, 0], [-3, 0], [2, -√2]]
+        # The `[-3, 0]` should be removed, it corresponds
+        # `[-3, √3 im]`, `[-3, -√3 im]` which is a complex pair
+        V = @set x^2 + x == 6 && y^2 == x solver
+        @test is_zero_dimensional(V)
+        testelements(V, [[2, √2], [2, -√2]])
+    end
 end
 
-@testset "Projective zero-dimensional ideal" begin
+@testset "Zero-dimensional ideal" begin
+    zero_dimensional_ideal(schur_solver)
+    zero_dimensional_ideal(newton_solver)
+end
+
+function projective_zero_dimensional_ideal(solver)
     Mod.@polyvar x y z
     V = projective_algebraic_set([x - y], solver)
     @test is_zero_dimensional(V)
@@ -108,7 +123,11 @@ end
     testelementstypes(V, [[0, 1]])
     V = projective_algebraic_set([x + y - x])
     @test is_zero_dimensional(V)
-    testelementstypes(V, [[1, 0]])
+    return testelementstypes(V, [[1, 0]])
+end
+
+@testset "Projective zero-dimensional ideal" begin
+    projective_zero_dimensional_ideal(schur_solver)
 end
 
 @testset "Example 5.1 of CGT97" begin
@@ -144,7 +163,7 @@ end
 
 @testset "Example 4.3 of MD95" begin
     Mod.@polyvar x y
-    V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3 solver
+    V = @set x^2 + 4y^4 == 4y^2 && 3x^4 + y^2 == 5x^3 schur_solver
     # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
     # the second and third do not seem that close but when the three first are averaged it is very close to zero.
     @test is_zero_dimensional(V)
@@ -163,7 +182,7 @@ end
 @testset "Example 5.2 of CGT97" begin
     Mod.@polyvar x y z
     V =
-        @set x^2 + y^2 == 1 && x^3 + (2 + z) * x * y + y^3 == 1 && z^2 == 2 solver
+        @set x^2 + y^2 == 1 && x^3 + (2 + z) * x * y + y^3 == 1 && z^2 == 2 schur_solver
     @test is_zero_dimensional(V)
     B = standard_monomials(V.I)
     @test !isnothing(B)

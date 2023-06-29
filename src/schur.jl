@@ -51,7 +51,7 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     atol = A[]
     # condition_number requires that conjugate pair need to be treated together so we first need to handle them
     # If they are in the same cluster then pair them, otherwise it is complex solution so we reject them
-    i = 1
+    i = firstindex(v)
     while i <= lastindex(v)
         if isreal(v[i])
             push!(clusters, [i])
@@ -106,4 +106,52 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
         end
     end
     return Z, clusters
+end
+
+"""
+    struct ReorderedSchurMultiplicationMatricesSolver{T,RNGT<:Random.AbstractRNG} <:
+        AbstractMultiplicationMatricesSolver
+        ɛ::T
+        rng::RNGT
+    end
+
+Simultaneous diagonalization of commuting matrices using the method of [CGT97].
+
+[CGT97] Corless, R. M.; Gianni, P. M. & Trager, B. M.
+*A reordered Schur factorization method for zero-dimensional polynomial systems with multiple roots*
+Proceedings of the 1997 international symposium on Symbolic and algebraic computation, 1997, 133-140
+"""
+struct ReorderedSchurMultiplicationMatricesSolver{T,RNGT<:Random.AbstractRNG} <:
+       AbstractMultiplicationMatricesSolver
+    ɛ::T
+    rng::RNGT
+end
+function ReorderedSchurMultiplicationMatricesSolver(ɛ)
+    return ReorderedSchurMultiplicationMatricesSolver(ɛ, Random.GLOBAL_RNG)
+end
+function ReorderedSchurMultiplicationMatricesSolver{T}() where {T}
+    return ReorderedSchurMultiplicationMatricesSolver(Base.rtoldefault(real(T)))
+end
+
+# Deterministic part
+function _solve_multiplication_matrices(
+    Ms::AbstractVector{<:AbstractMatrix{T}},
+    λ,
+    solver::ReorderedSchurMultiplicationMatricesSolver,
+) where {T<:Real}
+    @assert length(Ms) == length(λ)
+    n = length(λ)
+    Z, clusters = clusterordschur(sum(λ .* Ms), solver.ɛ)
+    r = length(clusters)
+    vals = [zeros(T, n) for k in 1:r]
+    for k in 1:r
+        nk = length(clusters[k])
+        for j in clusters[k]
+            q = Z[:, j]
+            for i in 1:n
+                vals[k][i] += dot(q, Ms[i] * q) / nk
+            end
+        end
+    end
+    return vals
 end

@@ -2,8 +2,7 @@ module SemialgebraicSets
 
 using Random
 
-import MutableArithmetics
-const MA = MutableArithmetics
+import MutableArithmetics as MA
 
 using MultivariatePolynomials
 const MP = MultivariatePolynomials
@@ -58,6 +57,7 @@ Base.intersect(set::AbstractSemialgebraicSet; kws...) = set
 
 include("groebner.jl")
 include("ideal.jl")
+include("multiplication_matrices.jl")
 include("solve.jl")
 include("variety.jl")
 include("basic.jl")
