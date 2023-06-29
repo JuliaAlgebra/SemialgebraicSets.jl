@@ -161,11 +161,11 @@ function cgt96_e51(solver)
         Z Iɛ
     ]
     α = 0.219
-    testelements(
+    return testelements(
         SemialgebraicSets._solve_multiplication_matrices(
             [A, B],
             [α, 1 - α],
-            solver
+            solver,
         ),
         [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]];
         rtol = 1e-7,
@@ -176,9 +176,9 @@ end
     @testset "Schur" begin
         cgt96_e51(schur_solver)
     end
-#    @testset "Newton" begin
-#        cgt96_e51(newton_solver)
-#    end
+    #    @testset "Newton" begin
+    #        cgt96_e51(newton_solver)
+    #    end
 end
 
 function md95_e43(solver)
@@ -187,7 +187,7 @@ function md95_e43(solver)
     # This test is tricky because in the schur decomposition, the 4 last eigenvalues are e.g. 3.4e-7, -1.7e-7+3e-7im, -1.7e-7-3e-7im, -6e-16
     # the second and third do not seem that close but when the three first are averaged it is very close to zero.
     @test is_zero_dimensional(V)
-    testelementstypes(
+    return testelementstypes(
         V,
         [
             [0.66209555, 0.935259169],

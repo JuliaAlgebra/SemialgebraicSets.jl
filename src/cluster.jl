@@ -50,7 +50,7 @@ function cluster_eigenvalues(_atol, v)
         best = ONE
         for _i in eachindex(σ)
             i = σ[_i]
-            for _j in 1:(_i - 1)
+            for _j in 1:(_i-1)
                 j = σ[_j]
                 d = abs(λ[i] - λ[j]) / min(atol[i], atol[j])
                 if d < best

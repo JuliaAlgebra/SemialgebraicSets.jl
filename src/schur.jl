@@ -37,7 +37,7 @@ function _clusterordschur(M::AbstractMatrix{<:Real}, ɛ)
     # documentation says that the error on the eigenvalues is ɛ * norm(T) / condition_number
     nT = norm(sf.T)
     clusters = cluster_eigenvalues(sf.values) do I
-        ɛ * nT / condition_number(sf, I)
+        return ɛ * nT / condition_number(sf, I)
     end
     return sf.Z, clusters
 end

@@ -7,10 +7,7 @@ function norm_off(M)
     n = LinearAlgebra.checksquare(M)
     if n > 1
         return sqrt(
-            sum(
-                abs2(M[i, j]) + abs2(M[j, i]) for i in 1:n for
-                j in i+1:n
-            ),
+            sum(abs2(M[i, j]) + abs2(M[j, i]) for i in 1:n for j in i+1:n),
         )
     else
         return zero(eltype(M))
@@ -134,32 +131,31 @@ function _solve_multiplication_matrices(M, λ, solver::NewtonTypeDiagonalization
         end
     end
 
-
     return [[D[j+1][i, i] / D[1][i, i] for j in 1:n] for i in 1:r]
 
-#    # I implemented this when I was analysing the result after only zero iteration so unsure if it's useful
-#    d = LinearAlgebra.Diagonal(sqrt.(inv.(LinearAlgebra.diag(D[1]))))
-#    Λ = [d * D[j+1] * d for j in 1:n]
+    #    # I implemented this when I was analysing the result after only zero iteration so unsure if it's useful
+    #    d = LinearAlgebra.Diagonal(sqrt.(inv.(LinearAlgebra.diag(D[1]))))
+    #    Λ = [d * D[j+1] * d for j in 1:n]
 
-#    # `Λ` can be decomposed into blocks corresponding to the same eigenvalue
-#    # These blocks can have off-diagonal entries so we further diagonalize
-#    # with
-#    # FIXME `solver.tol` or `solver.ε` or ?
-#    sub_solver = ReorderedSchurMultiplicationMatricesSolver(solver.ε, solver.rng)
-#    sols = Vector{eltype(Λ[1])}[]
-#    i = 1
-#    while i <= r
-#        j = findfirst((i+1):r) do j
-#            all(1:n) do k
-#                # FIXME `solver.tol` or `solver.ε` or ?
-#                return !isapprox(Λ[k][j, j], Λ[k][i, i], rtol = solver.ε)
-#            end
-#        end
-#        j = something(j, r - i + 1)
-#        I = i:(i+j-1)
-#        sub_matrices = MultiplicationMatrices([Λ[j][I, I] for j in 1:n])
-#        append!(sols, solve(sub_matrices, sub_solver))
-#        i += j
-#    end
-#    return sols
+    #    # `Λ` can be decomposed into blocks corresponding to the same eigenvalue
+    #    # These blocks can have off-diagonal entries so we further diagonalize
+    #    # with
+    #    # FIXME `solver.tol` or `solver.ε` or ?
+    #    sub_solver = ReorderedSchurMultiplicationMatricesSolver(solver.ε, solver.rng)
+    #    sols = Vector{eltype(Λ[1])}[]
+    #    i = 1
+    #    while i <= r
+    #        j = findfirst((i+1):r) do j
+    #            all(1:n) do k
+    #                # FIXME `solver.tol` or `solver.ε` or ?
+    #                return !isapprox(Λ[k][j, j], Λ[k][i, i], rtol = solver.ε)
+    #            end
+    #        end
+    #        j = something(j, r - i + 1)
+    #        I = i:(i+j-1)
+    #        sub_matrices = MultiplicationMatrices([Λ[j][I, I] for j in 1:n])
+    #        append!(sols, solve(sub_matrices, sub_solver))
+    #        i += j
+    #    end
+    #    return sols
 end
