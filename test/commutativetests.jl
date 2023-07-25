@@ -1,4 +1,5 @@
 include("macro.jl")
 include("groebner.jl")
+include("schur.jl")
 include("solve.jl")
 include("variety.jl")

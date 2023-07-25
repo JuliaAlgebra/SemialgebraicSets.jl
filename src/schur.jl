@@ -8,13 +8,24 @@ function condition_number(sf::Schur, I)
     for i in I
         select[i] = 1
     end
-    return LinearAlgebra.LAPACK.trsen!(
-        'E',
-        'N',
-        select,
-        copy(sf.T),
-        copy(sf.Z),
-    )[4]
+    try
+        return LinearAlgebra.LAPACK.trsen!(
+            'E',
+            'N',
+            select,
+            copy(sf.T),
+            copy(sf.Z),
+        )[4]
+    catch err
+        if err isa LinearAlgebra.LAPACKException
+            ε = eps(real(eltype(sf.values)))
+            @warn("`LAPACK.trsen!` throwed an exception for `$(I)` so using default tolerance `$ε`")
+            # Not sure why this happens, see `test/schur` for an example
+            return ε
+        else
+            rethrow(err)
+        end
+    end
 end
 
 # Manocha, D. & Demmel, J. Algorithms for intersecting parametric and algebraic curves II: multiple intersections
