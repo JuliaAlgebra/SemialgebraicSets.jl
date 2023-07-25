@@ -19,7 +19,9 @@ function condition_number(sf::Schur, I)
     catch err
         if err isa LinearAlgebra.LAPACKException
             ε = eps(real(eltype(sf.values)))
-            @warn("`LAPACK.trsen!` throwed an exception for `$(I)` so using default tolerance `$ε`")
+            @warn(
+                "`LAPACK.trsen!` throwed an exception for `$(I)` so using default tolerance `$ε`"
+            )
             # Not sure why this happens, see `test/schur` for an example
             return ε
         else
