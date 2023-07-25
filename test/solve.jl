@@ -30,34 +30,7 @@ end
     @test sort(sort.(clusters); by = first) == [[1, 5, 6], [2]]
 end
 
-function testelements(X, Y; atol = Base.rtoldefault(Float64), kwargs...)
-    @test length(X) == length(Y)
-    for y in Y
-        @test any(x -> isapprox(x, y; atol = atol, kwargs...), X)
-    end
-end
-function testelementstypes(X, Y; kwargs...)
-    testelements(X, Y; kwargs...)
-    for T in [Rational{Int}, Float64]
-        if X isa FixedVariablesSet
-            U = T
-        else
-            U = float(T)
-        end
-        V = similar(X, T)
-        testelements(V, Y; kwargs...)
-        @test eltype(V) == Vector{U}
-        @test collect(V) isa Vector{Vector{U}}
-    end
-end
-
-# We use a fixed RNG in the tests to decrease nondeterminism. There is still nondeterminism in LAPACK though
-using Random
-schur_solver = ReorderedSchurMultiplicationMatricesSolver(
-    sqrt(eps(Float64)),
-    MersenneTwister(0),
-)
-newton_solver = NewtonTypeDiagonalization()
+include("utils.jl")
 
 function zero_dimensional_ideal(solver)
     Mod.@polyvar x y z
@@ -139,46 +112,6 @@ end
 @testset "Projective zero-dimensional ideal" begin
     projective_zero_dimensional_ideal(schur_solver)
     projective_zero_dimensional_ideal(newton_solver)
-end
-
-function cgt96_e51(solver)
-    ɛ = 1e-4
-    Iɛ = [
-        1-ɛ 0
-        0 1+ɛ
-    ]
-    J = [
-        0 1
-        1 0
-    ]
-    Z = zeros(2, 2)
-    A = [
-        Iɛ Z
-        Z J
-    ]
-    B = [
-        J Z
-        Z Iɛ
-    ]
-    α = 0.219
-    return testelements(
-        SemialgebraicSets._solve_multiplication_matrices(
-            [A, B],
-            [α, 1 - α],
-            solver,
-        ),
-        [[1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]];
-        rtol = 1e-7,
-    )
-end
-
-@testset "Example 5.1 of CGT97" begin
-    @testset "Schur" begin
-        cgt96_e51(schur_solver)
-    end
-    #    @testset "Newton" begin
-    #        cgt96_e51(newton_solver)
-    #    end
 end
 
 function md95_e43(solver)
