@@ -42,6 +42,13 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - name: dev
+        shell: julia --project=@. {0}
+        run: |
+          using Pkg
+          Pkg.add([
+              PackageSpec(name="MultivariatePolynomials", rev="bl/div_field"),
+          ])
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         with:
