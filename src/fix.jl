@@ -68,6 +68,9 @@ end
 
 ideal(set::FixedVariablesSet, args...) = set.ideal
 MP.variables(set::FixedVariablesSet) = MP.variables(set.ideal)
+function MP.monomial_type(::Type{FixedVariablesSet{V,T,M}}) where {V,T,M}
+    return M
+end
 function nequalities(set::FixedVariablesSet)
     if set.ideal.substitutions === nothing
         return 1

@@ -10,10 +10,17 @@ function SemialgebraicSets.default_gröbner_basis_algorithm(p, ::DummySolver)
 end
 SemialgebraicSets.promote_for(::Type{T}, ::Type{DummySolver}) where {T} = T
 
+function _test_polynomial_API(set, vars)
+    mono = prod(vars)
+    @test @inferred(variables(set)) == variables(mono)
+    @test @inferred(monomial_type(typeof(set))) == monomial_type(typeof(mono))
+end
+
 function runtests()
     Main.Mod.@polyvar x y
     @test isa(FullSpace(), FullSpace)
     V = @set x * y == 1
+    _test_polynomial_API(V, (x, y))
     @test V isa AlgebraicSet{Rational{BigInt}}
     @test_throws ArgumentError add_inequality!(V, x * y)
     @testset "Basic" begin
@@ -22,6 +29,7 @@ function runtests()
         add_inequality!(S, x + y - 1)
         # Algebraic set forces `Rational{BigInt}`
         @test S isa BasicSemialgebraicSet{Rational{BigInt}}
+        _test_polynomial_API(S, (x, y))
         @test S == basic_semialgebraic_set(S.V, S.p)
         @test sprint(show, S) ==
               "{ (x, y) | -y + x = 0, -y + x^2 = 0, -1//1 + x^2*y ≥ 0, -1//1 + y + x ≥ 0 }"
@@ -49,6 +57,7 @@ function runtests()
                   1.0x^2 * y >= 0 &&
                   (6 // 3) * x^2 * y == -y &&
                   1.5x + y >= 0)
+            _test_polynomial_API(S, (x, y))
             S2 = S ∩ V
             S3 = V ∩ S
             @test inequalities(S2) == inequalities(S3) == S.p
@@ -56,15 +65,19 @@ function runtests()
         end
 
         T = (@set x * y^2 == -1 && x^2 + y^2 <= 1)
+        _test_polynomial_API(T, (x, y))
         V2 = @set T.V && V && x + y == 2.0
+        _test_polynomial_API(V2, (x, y))
         @test V2 isa AlgebraicSet
         @test V2.I.p == [equalities(T); equalities(V); x + y - 2.0]
         S4 = @set S && T
+        _test_polynomial_API(S4, (x, y))
         @test S4.p == [S.p; inequalities(T)]
         @test equalities(S4) == [S.V.I.p; T.V.I.p]
 
         @testset "Different variables" begin
             T = (@set x == x^2 && y <= y^2)
+            _test_polynomial_API(T, (x, y))
             @test sprint(show, T) == "{ (x, y) | x - x^2 = 0, -y + y^2 ≥ 0 }"
             @test sprint(show, MIME"text/plain"(), T) ==
                   "Basic semialgebraic Set defined by 1 equalitty\n x - x^2 = 0\n1 inequalitty\n -y + y^2 ≥ 0\n"
@@ -72,6 +85,7 @@ function runtests()
     end
     @testset "Basic with no equality" begin
         S = @set x + y ≥ 1 && x ≤ y
+        _test_polynomial_API(S, (x, y))
         @test sprint(show, S) == "{ (x, y) | -1 + y + x ≥ 0, y - x ≥ 0 }"
         @test sprint(show, MIME"text/plain"(), S) == """
 Basic semialgebraic Set defined by no equality
@@ -98,6 +112,7 @@ Algebraic Set defined by no equality
     end
     @testset "Basic with fixed variables" begin
         S = @set x == 1 && x ≤ x^2
+        _test_polynomial_API(S, (x,))
         @test sprint(show, S) == "{ (x) | -1 + x = 0, -x + x^2 ≥ 0 }"
         @test sprint(show, MIME"text/plain"(), S) ==
               "Basic semialgebraic Set defined by 1 equalitty\n -1 + x = 0\n1 inequalitty\n -x + x^2 ≥ 0\n"
@@ -106,6 +121,7 @@ Algebraic Set defined by no equality
               "Algebraic Set defined by 1 equalitty\n -1 + x = 0\n"
 
         S = @set x == 1 && x ≤ y && 2 == y
+        _test_polynomial_API(S, (x, y))
         @test S isa BasicSemialgebraicSet{Int}
         @test S.V isa FixedVariablesSet{<:AbstractVariable,Int}
         @test rem(x + y, ideal(S.V)) == 3
@@ -118,6 +134,7 @@ Algebraic Set defined by no equality
         @test rem(x + y, ideal(Sf.V)) == 3
 
         S = @set x == 1 && x ≤ y && 2 == y && 1 == x
+        _test_polynomial_API(S, (x, y))
         @test S isa BasicSemialgebraicSet{Int}
         @test S.V isa FixedVariablesSet{<:AbstractVariable,Int}
         @test rem(x + y, ideal(S.V)) == 3
@@ -136,6 +153,7 @@ Algebraic Set defined by no equality
             )
                 @test S isa BasicSemialgebraicSet{Int}
                 @test S.V isa FixedVariablesSet{<:AbstractVariable,Int}
+                _test_polynomial_API(S, (x, y))
                 @test isempty(S.V)
                 @test iszero(length(S.V))
                 @test isempty(collect(S.V))
@@ -154,6 +172,7 @@ Algebraic Set defined by no equality
         ]
             @test S isa BasicSemialgebraicSet{Rational{BigInt}}
             @test S.V isa AlgebraicSet{Rational{BigInt}}
+            _test_polynomial_API(S, (x, y))
         end
 
         solver = DummySolver()
@@ -167,6 +186,7 @@ Algebraic Set defined by no equality
         ]
             @test S isa BasicSemialgebraicSet{Rational{BigInt}}
             @test S.V isa AlgebraicSet{Rational{BigInt}}
+            _test_polynomial_API(S, (x, y))
             @test S.V.solver === solver
         end
     end
