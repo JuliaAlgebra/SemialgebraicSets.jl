@@ -118,6 +118,7 @@ end
 ideal(V::AlgebraicSet) = V.I
 
 MP.variables(V::AlgebraicSet) = MP.variables(V.I)
+MP.monomial_type(::Type{<:AlgebraicSet{T,P}}) where {T,P} = MP.monomial_type(P)
 nequalities(V::AlgebraicSet) = length(V.I.p)
 equalities(V::AlgebraicSet) = V.I.p
 add_equality!(V::AlgebraicSet, p) = push!(V.I.p, p)

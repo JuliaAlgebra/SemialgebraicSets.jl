@@ -30,6 +30,8 @@ function basic_semialgebraic_set(V, p)
     return BasicSemialgebraicSet(V, p)
 end
 
+algebraic_set(set::BasicSemialgebraicSet) = set.V
+
 function MP.similar_type(
     ::Type{BasicSemialgebraicSet{S,PS,AT}},
     T::Type,
@@ -55,6 +57,15 @@ function MP.variables(
 end
 function MP.variables(S::BasicSemialgebraicSet)
     return sort(union(MP.variables(S.V), MP.variables(S.p)); rev = true)
+end
+function MP.monomial_type(::Type{BasicSemialgebraicSet{T,P,A}}) where {T,P,A}
+    M1 = MP.monomial_type(A)
+    M2 = MP.monomial_type(P)
+    if isnothing(M1)
+        return M2
+    else
+        return promote_type(M1, M2)
+    end
 end
 nequalities(S::BasicSemialgebraicSet) = nequalities(S.V)
 equalities(S::BasicSemialgebraicSet) = equalities(S.V)

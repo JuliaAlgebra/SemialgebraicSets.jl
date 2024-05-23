@@ -32,7 +32,8 @@ function Base.show(io::IO, ::FullSpace)
 end
 nequalities(::FullSpace) = 0
 equalities(::FullSpace) = []
-MP.similar_type(S::Type{FullSpace}, T::Type) = S
+MP.similar_type(S::Type{FullSpace}, ::Type) = S
+MP.monomial_type(::Type{FullSpace}) = nothing
 
 function Base.similar(set::AbstractSemialgebraicSet, T::Type)
     return convert(MP.similar_type(typeof(set), T), set)
