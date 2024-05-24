@@ -67,6 +67,9 @@ function Base.convert(
 end
 
 ideal(set::FixedVariablesSet, args...) = set.ideal
+function MA.promote_operation(::typeof(ideal), ::Type{FixedVariablesSet{V,T,M}}) where {V,T,M}
+    return FixedVariablesIdeal{V,T,M}
+end
 MP.variables(set::FixedVariablesSet) = MP.variables(set.ideal)
 function MP.monomial_type(::Type{FixedVariablesSet{V,T,M}}) where {V,T,M}
     return M

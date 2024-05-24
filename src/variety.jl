@@ -116,6 +116,9 @@ function projective_algebraic_set(p::Vector, args...)
 end
 
 ideal(V::AlgebraicSet) = V.I
+function MA.promote_operation(::typeof(ideal), ::Type{<:AlgebraicSet{T,P,A}}) where {T,P,A}
+    return PolynomialIdeal{T,P,A}
+end
 
 MP.variables(V::AlgebraicSet) = MP.variables(V.I)
 MP.monomial_type(::Type{<:AlgebraicSet{T,P}}) where {T,P} = MP.monomial_type(P)
