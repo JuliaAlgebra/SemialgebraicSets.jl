@@ -1,6 +1,7 @@
 module TestMacro
 
 using Test
+import MutableArithmetics as MA
 using SemialgebraicSets
 using MultivariatePolynomials
 
@@ -14,6 +15,14 @@ function _test_polynomial_API(set, vars)
     mono = prod(vars)
     @test @inferred(variables(set)) == variables(mono)
     @test @inferred(monomial_type(typeof(set))) == monomial_type(typeof(mono))
+    V = set
+    if !(V isa AbstractAlgebraicSet)
+        V = algebraic_set(V)
+    end
+    if !(V isa FullSpace)
+        @test typeof(ideal(V)) == MA.promote_operation(ideal, typeof(V))
+    end
+    return
 end
 
 function runtests()
