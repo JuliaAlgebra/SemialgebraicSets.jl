@@ -116,7 +116,10 @@ function projective_algebraic_set(p::Vector, args...)
 end
 
 ideal(V::AlgebraicSet) = V.I
-function MA.promote_operation(::typeof(ideal), ::Type{<:AlgebraicSet{T,P,A}}) where {T,P,A}
+function MA.promote_operation(
+    ::typeof(ideal),
+    ::Type{<:AlgebraicSet{T,P,A}},
+) where {T,P,A}
     return PolynomialIdeal{T,P,A}
 end
 
