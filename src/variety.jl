@@ -149,7 +149,7 @@ function _show_els(io::IO, name, n, els, sign)
     if n == 0
         println(io, "no $(name)y")
     elseif n == 1
-        println(io, "1 $(name)ty")
+        println(io, "1 $(name)y")
     else
         println(io, "$n $(name)ies")
     end

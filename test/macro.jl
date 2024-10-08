@@ -89,7 +89,7 @@ function runtests()
             _test_polynomial_API(T, (x, y))
             @test sprint(show, T) == "{ (x, y) | x - x^2 = 0, -y + y^2 ≥ 0 }"
             @test sprint(show, MIME"text/plain"(), T) ==
-                  "Basic semialgebraic Set defined by 1 equalitty\n x - x^2 = 0\n1 inequalitty\n -y + y^2 ≥ 0\n"
+                  "Basic semialgebraic Set defined by 1 equality\n x - x^2 = 0\n1 inequality\n -y + y^2 ≥ 0\n"
         end
     end
     @testset "Basic with no equality" begin
@@ -124,10 +124,10 @@ Algebraic Set defined by no equality
         _test_polynomial_API(S, (x,))
         @test sprint(show, S) == "{ (x) | -1 + x = 0, -x + x^2 ≥ 0 }"
         @test sprint(show, MIME"text/plain"(), S) ==
-              "Basic semialgebraic Set defined by 1 equalitty\n -1 + x = 0\n1 inequalitty\n -x + x^2 ≥ 0\n"
+              "Basic semialgebraic Set defined by 1 equality\n -1 + x = 0\n1 inequality\n -x + x^2 ≥ 0\n"
         @test sprint(show, S.V) == "{ (x) | -1 + x = 0 }"
         @test sprint(show, MIME"text/plain"(), S.V) ==
-              "Algebraic Set defined by 1 equalitty\n -1 + x = 0\n"
+              "Algebraic Set defined by 1 equality\n -1 + x = 0\n"
 
         S = @set x == 1 && x ≤ y && 2 == y
         _test_polynomial_API(S, (x, y))
