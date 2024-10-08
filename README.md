@@ -32,18 +32,27 @@ julia> using SemialgebraicSets, TypedPolynomials
 julia> @polyvar x y;
 
 julia> @set x^2 + y^2 <= 1 # Euclidean ball
+Basic semialgebraic Set defined by no equality
+1 inequality
+ 1 - y^2 - x^2 ≥ 0
+
+
+julia> basic_semialgebraic_set(FullSpace(), [1 - x^2 - y^2])
+Basic semialgebraic Set defined by no equality
+1 inequality
+ 1 - y^2 - x^2 ≥ 0
 
 julia> @set y^2 == x^3 - x && x <= 0 # Cutting the algebraic variety https://en.wikipedia.org/wiki/Algebraic_variety#/media/File:Elliptic_curve2.png
-Basic semialgebraic Set defined by 1 equalitty
+Basic semialgebraic Set defined by 1 equality
  x + y^2 - x^3 = 0
-1 inequalitty
+1 inequality
  -x ≥ 0
 
 
 julia> basic_semialgebraic_set(algebraic_set([y^2- x^3 - x]), [-x])
-Basic semialgebraic Set defined by 1 equalitty
+Basic semialgebraic Set defined by 1 equality
  -x + y^2 - x^3 = 0
-1 inequalitty
+1 inequality
  -x ≥ 0
 ```
 
