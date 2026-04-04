@@ -3,6 +3,7 @@ module SemialgebraicSets
 using Random
 
 import MutableArithmetics as MA
+import StarAlgebras as SA
 
 using MultivariatePolynomials
 const MP = MultivariatePolynomials
@@ -40,8 +41,8 @@ function Base.similar(set::AbstractSemialgebraicSet, T::Type)
 end
 
 Base.intersect(S::AbstractAlgebraicSet, T::FullSpace) = S
-Base.intersect(S::FullSpace, T::AbstractAlgebraicSet) = T
-Base.intersect(S::FullSpace, T::FullSpace) = S
+Base.intersect(::FullSpace, T::AbstractAlgebraicSet) = T
+Base.intersect(S::FullSpace, ::FullSpace) = S
 
 # If `intersect(S, T)` is not implemented, this method will `StackOverflow`.
 function Base.intersect(
@@ -64,6 +65,7 @@ include("variety.jl")
 include("basic.jl")
 
 include("fix.jl")
+include("promote.jl")
 include("macro.jl")
 
 include("deprecate.jl")
