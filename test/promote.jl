@@ -154,6 +154,19 @@ using SemialgebraicSets
         @test Set(MP.variables(ineqs[1])) == Set([x, y])
     end
 
+    @testset "FixedVariablesSet with polynomial - different variables" begin
+        V = FixedVariablesSet(
+            SemialgebraicSets.FixedVariablesIdeal{typeof(x),Int,typeof(x * y)}(
+                Dict(x => 1),
+            ),
+        )
+        p = y + z
+        (new_V, map_V), (new_p, map_p) = SA.promote_bases_with_maps(V, p)
+        @test map_V !== nothing
+        @test map_p !== nothing
+        @test new_V === V
+    end
+
     @testset "AlgebraicSet with polynomial - overlapping variables" begin
         V = @set x + y == 1
         p = y + z
