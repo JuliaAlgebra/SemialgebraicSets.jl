@@ -13,10 +13,12 @@ function SA.promote_bases_with_maps(
     return SA.maybe_promote(a, _a...), SA.maybe_promote(b, _b...)
 end
 
+function _map_polys(p, vars, map)
+    return first.(SA.promote_with_map.(p, Ref(vars), Ref(map)))
+end
+
 function SA.promote_with_map(set::AlgebraicSet, new_vars, exponent_map)
-    new_polys = first.(
-        SA.promote_with_map.(equalities(set), Ref(new_vars), Ref(exponent_map)),
-    )
+    new_polys = _map_polys(equalities(set), new_vars, exponent_map)
     new_I = PolynomialIdeal(new_polys, set.I.algo)
     new_set = AlgebraicSet(new_I, set.solver)
     return new_set, exponent_map
@@ -32,12 +34,6 @@ end
 
 function SA.promote_with_map(set::BasicSemialgebraicSet, new_vars, exponent_map)
     new_V, _ = SA.promote_with_map(set.V, new_vars, exponent_map)
-    new_p = first.(
-        SA.promote_with_map.(
-            inequalities(set),
-            Ref(new_vars),
-            Ref(exponent_map),
-        ),
-    )
-    return BasicSemialgebraicSet(new_V, new_p), exponent_map
+    new_polys = _map_polys(inequalities(set), new_vars, exponent_map)
+    return BasicSemialgebraicSet(new_V, new_polys), exponent_map
 end
