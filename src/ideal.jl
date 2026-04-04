@@ -50,7 +50,10 @@ end
 ideal(p, algo = default_gröbner_basis_algorithm(p)) = PolynomialIdeal(p, algo)
 
 function Base.:+(I::PolynomialIdeal, J::PolynomialIdeal)
-    return PolynomialIdeal(_promote_polys_to_common_variables([I.p; J.p]), I.algo)
+    return PolynomialIdeal(
+        _promote_polys_to_common_variables([I.p; J.p]),
+        I.algo,
+    )
 end
 
 MP.variables(I::PolynomialIdeal) = variables(I.p)
