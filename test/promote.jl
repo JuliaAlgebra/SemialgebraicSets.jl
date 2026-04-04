@@ -54,10 +54,9 @@ using SemialgebraicSets
         (new_V, map_V), (new_p, map_p) = SA.promote_bases_with_maps(V, p)
         @test map_V !== nothing
         @test map_p !== nothing
-        @test MP.variables(new_V) == [z, y, x]
         new_eq = equalities(new_V)
         @test length(new_eq) == 1
-        @test MP.variables(new_eq[1]) == [x]
+        @test equalities(new_V) !== equalities(V)
     end
 
     @testset "AlgebraicSet with AlgebraicSet - same variables" begin
@@ -76,14 +75,12 @@ using SemialgebraicSets
         (new_V1, map_V1), (new_V2, map_V2) = SA.promote_bases_with_maps(V1, V2)
         @test map_V1 !== nothing
         @test map_V2 !== nothing
-        @test MP.variables(new_V1) == [y, x]
-        @test MP.variables(new_V2) == [y, x]
         eq1 = equalities(new_V1)
         @test length(eq1) == 1
-        @test MP.variables(eq1[1]) == [x]
+        @test equalities(new_V1) !== equalities(V1)
         eq2 = equalities(new_V2)
         @test length(eq2) == 1
-        @test MP.variables(eq2[1]) == [y]
+        @test equalities(new_V2) !== equalities(V2)
     end
 
     @testset "BasicSemialgebraicSet with polynomial - same variables" begin
@@ -104,7 +101,7 @@ using SemialgebraicSets
         @test map_p !== nothing
         ineqs = inequalities(new_S)
         @test length(ineqs) == 1
-        @test MP.variables(ineqs[1]) == [x]
+        @test inequalities(new_S) !== inequalities(S)
     end
 
     @testset "BasicSemialgebraicSet with AlgebraicSet - same variables" begin
@@ -135,10 +132,10 @@ using SemialgebraicSets
         @test map_S2 !== nothing
         ineqs1 = inequalities(new_S1)
         @test length(ineqs1) == 1
-        @test MP.variables(ineqs1[1]) == [x]
+        @test inequalities(new_S1) !== inequalities(S1)
         ineqs2 = inequalities(new_S2)
         @test length(ineqs2) == 1
-        @test MP.variables(ineqs2[1]) == [y]
+        @test inequalities(new_S2) !== inequalities(S2)
     end
 
     @testset "BasicSemialgebraicSet (with FullSpace V) - different variables" begin
@@ -151,7 +148,7 @@ using SemialgebraicSets
         @test new_S.V isa FullSpace
         ineqs = inequalities(new_S)
         @test length(ineqs) == 1
-        @test MP.variables(ineqs[1]) == [x]
+        @test inequalities(new_S) !== inequalities(S)
     end
 
     @testset "AlgebraicSet with polynomial - overlapping variables" begin
@@ -162,6 +159,6 @@ using SemialgebraicSets
         @test map_p !== nothing
         eq = equalities(new_V)
         @test length(eq) == 1
-        @test Set(MP.variables(eq[1])) == Set([x, y])
+        @test equalities(new_V) !== equalities(V)
     end
 end

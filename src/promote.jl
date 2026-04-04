@@ -14,7 +14,14 @@ function SA.promote_bases_with_maps(
 end
 
 function _promote_polys(polys, vars, exponent_map)
-    return [first(SA.promote_with_map(p, vars, exponent_map)) for p in polys]
+    return [_promote_poly(p, vars, exponent_map) for p in polys]
+end
+
+function _promote_poly(p::MP.AbstractPolynomialLike, vars, exponent_map)
+    return sum(
+        MP.coefficient(t) * first(SA.promote_with_map(MP.monomial(t), vars, exponent_map))
+        for t in MP.terms(p)
+    )
 end
 
 function SA.promote_with_map(set::AlgebraicSet, vars, exponent_map)
