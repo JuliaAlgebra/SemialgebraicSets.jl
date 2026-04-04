@@ -127,7 +127,11 @@ MP.variables(V::AlgebraicSet) = MP.variables(V.I)
 MP.monomial_type(::Type{<:AlgebraicSet{T,P}}) where {T,P} = MP.monomial_type(P)
 nequalities(V::AlgebraicSet) = length(V.I.p)
 equalities(V::AlgebraicSet) = V.I.p
-add_equality!(V::AlgebraicSet, p) = push!(V.I.p, p)
+function add_equality!(V::AlgebraicSet, p)
+    push!(V.I.p, p)
+    V.I.p .= _promote_polys_to_common_variables(V.I.p)
+    return nothing
+end
 function Base.intersect(S::AlgebraicSet, T::AlgebraicSet)
     return AlgebraicSet(S.I + T.I, S.solver)
 end

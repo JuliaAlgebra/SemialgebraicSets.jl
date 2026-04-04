@@ -72,10 +72,16 @@ equalities(S::BasicSemialgebraicSet) = equalities(S.V)
 add_equality!(S::BasicSemialgebraicSet, p) = add_equality!(S.V, p)
 ninequalities(S::BasicSemialgebraicSet) = length(S.p)
 inequalities(S::BasicSemialgebraicSet) = S.p
-add_inequality!(S::BasicSemialgebraicSet, p) = push!(S.p, p)
+function add_inequality!(S::BasicSemialgebraicSet, p)
+    push!(S.p, p)
+    S.p .= _promote_polys_to_common_variables(S.p)
+    return nothing
+end
 
 function Base.intersect(S::BasicSemialgebraicSet, T::BasicSemialgebraicSet)
-    return BasicSemialgebraicSet(S.V ∩ T.V, [S.p; T.p])
+    V = S.V ∩ T.V
+    p = _promote_polys_to_common_variables([S.p; T.p])
+    return BasicSemialgebraicSet(V, p)
 end
 function Base.intersect(S::BasicSemialgebraicSet, T::AbstractAlgebraicSet)
     return BasicSemialgebraicSet(S.V ∩ T, copy(S.p))

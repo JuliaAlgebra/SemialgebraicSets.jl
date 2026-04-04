@@ -17,6 +17,12 @@ function _map_polys(p, vars, map)
     return first.(SA.promote_with_map.(p, Ref(vars), Ref(map)))
 end
 
+function _promote_polys_to_common_variables(polys)
+    isempty(polys) && return polys
+    all_vars = MP.variables(polys)
+    return [first(SA.maybe_promote(p, MP.promote_variables_with_maps(MP.variables(p), all_vars)[1]...)) for p in polys]
+end
+
 function SA.promote_with_map(set::AlgebraicSet, new_vars, exponent_map)
     new_polys = _map_polys(equalities(set), new_vars, exponent_map)
     new_I = PolynomialIdeal(new_polys, set.I.algo)

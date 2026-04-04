@@ -167,6 +167,18 @@ using SemialgebraicSets
         @test new_V === V
     end
 
+    @testset "Polynomials promoted to common variables at construction" begin
+        S = @set x >= 1 && y >= 1
+        ineqs = inequalities(S)
+        @test MP.variables(ineqs[1]) == MP.variables(ineqs[2])
+        @test Set(MP.variables(ineqs[1])) == Set([x, y])
+
+        V = @set x^2 == 1 && y^2 == 4
+        eqs = equalities(V)
+        @test MP.variables(eqs[1]) == MP.variables(eqs[2])
+        @test Set(MP.variables(eqs[1])) == Set([x, y])
+    end
+
     @testset "AlgebraicSet with polynomial - overlapping variables" begin
         V = @set x + y == 1
         p = y + z
