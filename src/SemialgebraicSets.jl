@@ -63,9 +63,9 @@ include("multiplication_matrices.jl")
 include("solve.jl")
 include("variety.jl")
 include("basic.jl")
-include("promote.jl")
 
 include("fix.jl")
+include("promote.jl")
 include("macro.jl")
 
 include("deprecate.jl")
