@@ -40,8 +40,8 @@ function Base.similar(set::AbstractSemialgebraicSet, T::Type)
 end
 
 Base.intersect(S::AbstractAlgebraicSet, T::FullSpace) = S
-Base.intersect(S::FullSpace, T::AbstractAlgebraicSet) = T
-Base.intersect(S::FullSpace, T::FullSpace) = S
+Base.intersect(::FullSpace, T::AbstractAlgebraicSet) = T
+Base.intersect(S::FullSpace, ::FullSpace) = S
 
 # If `intersect(S, T)` is not implemented, this method will `StackOverflow`.
 function Base.intersect(
@@ -62,6 +62,7 @@ include("multiplication_matrices.jl")
 include("solve.jl")
 include("variety.jl")
 include("basic.jl")
+include("promote.jl")
 
 include("fix.jl")
 include("macro.jl")
