@@ -3,6 +3,7 @@ module SemialgebraicSets
 using Random
 
 import MutableArithmetics as MA
+import StarAlgebras as SA
 
 using MultivariatePolynomials
 const MP = MultivariatePolynomials
