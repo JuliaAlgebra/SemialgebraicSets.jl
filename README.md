@@ -120,7 +120,7 @@ julia> collect(V)
  [-3.0000000000000004, -2.0000000000000004]
 ```
 
-[build-img]: https://github.com/JuliaAlgebra/SemialgebraicSets.jl/workflows/CI/badge.svg?branch=master
+[build-img]: https://github.com/JuliaAlgebra/SemialgebraicSets.jl/actions/workflows/ci.yml/badge.svg?branch=master
 [build-url]: https://github.com/JuliaAlgebra/SemialgebraicSets.jl/actions?query=workflow%3ACI
 [codecov-img]: http://codecov.io/github/JuliaAlgebra/SemialgebraicSets.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/JuliaAlgebra/SemialgebraicSets.jl?branch=master
