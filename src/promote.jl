@@ -29,7 +29,11 @@ function _promote_polys(polys, new_vars)
     return [_promote_poly(p, new_vars) for p in polys]
 end
 
-function SA.promote_with_map(p::MP.AbstractPolynomialLike, new_vars, exponent_map)
+function SA.promote_with_map(
+    p::MP.AbstractPolynomialLike,
+    new_vars,
+    exponent_map,
+)
     return _promote_poly(p, new_vars), exponent_map
 end
 

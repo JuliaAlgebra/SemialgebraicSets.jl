@@ -7,7 +7,7 @@ function norm_off(M)
     n = LinearAlgebra.checksquare(M)
     if n > 1
         return sqrt(
-            sum(abs2(M[i, j]) + abs2(M[j, i]) for i in 1:n for j in i+1:n),
+            sum(abs2(M[i, j]) + abs2(M[j, i]) for i in 1:n for j in (i+1):n),
         )
     else
         return zero(eltype(M))
