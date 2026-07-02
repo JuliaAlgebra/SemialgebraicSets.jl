@@ -2,6 +2,7 @@ using Test
 
 import StarAlgebras as SA
 import MultivariatePolynomials as MP
+import MultivariateBases as MB
 
 using SemialgebraicSets
 
@@ -188,5 +189,56 @@ using SemialgebraicSets
         eq = equalities(new_V)
         @test length(eq) == 1
         @test Set(MP.variables(eq[1])) == Set([x, y, z])
+    end
+
+    @testset "FullSpace with AlgebraElement" begin
+        f = FullSpace()
+        a = MB.algebra_element(x^2 + y)
+        (new_f, map_f), (new_a, map_a) = SA.promote_bases_with_maps(f, a)
+        @test new_f isa FullSpace
+        @test map_f === nothing
+        @test new_a === a
+        @test map_a === nothing
+    end
+
+    @testset "AlgebraicSet with AlgebraElement - same variables" begin
+        V = @set x * y == 1
+        a = MB.algebra_element(x + y)
+        (new_V, map_V), (new_a, map_a) = SA.promote_bases_with_maps(V, a)
+        @test new_V === V
+        @test map_V === nothing
+        @test new_a === a
+        @test map_a === nothing
+    end
+
+    @testset "AlgebraicSet with AlgebraElement - different variables" begin
+        V = @set x^2 == 1
+        a = MB.algebra_element(y + z)
+        (new_V, map_V), (new_a, map_a) = SA.promote_bases_with_maps(V, a)
+        @test map_V !== nothing
+        @test map_a !== nothing
+        @test Set(MP.variables(new_V)) == Set([x, y, z])
+        @test Set(MP.variables(new_a)) == Set([x, y, z])
+    end
+
+    @testset "BasicSemialgebraicSet with AlgebraElement - same variables" begin
+        S = @set x - y == 0 && x^2 * y >= 1
+        a = MB.algebra_element(x + y)
+        (new_S, map_S), (new_a, map_a) = SA.promote_bases_with_maps(S, a)
+        @test new_S === S
+        @test map_S === nothing
+        @test new_a === a
+        @test map_a === nothing
+    end
+
+    @testset "BasicSemialgebraicSet with AlgebraElement - different variables" begin
+        S = @set x >= 1
+        a = MB.algebra_element(y + z)
+        (new_S, map_S), (new_a, map_a) = SA.promote_bases_with_maps(S, a)
+        @test map_S !== nothing
+        @test map_a !== nothing
+        @test Set(MP.variables(new_a)) == Set([x, y, z])
+        ineqs = inequalities(new_S)
+        @test length(ineqs) == 1
     end
 end
