@@ -1,3 +1,14 @@
+_promote_with_variables(a, vars, map) = SA.maybe_promote(a, vars, map)
+
+function _promote_with_variables(
+    p::Union{MP.AbstractPolynomial,MP.AbstractTerm},
+    vars,
+    _,
+)
+    basis = MP.FullBasis{MP.Monomial}(vars)
+    return first(SA.promote_bases_with_maps(p, basis))
+end
+
 function SA.promote_bases_with_maps(
     ::FullSpace,
     p::Union{MP.AbstractPolynomialLike,AbstractSemialgebraicSet},
@@ -10,11 +21,11 @@ function SA.promote_bases_with_maps(
     b::Union{MP.AbstractPolynomialLike,AbstractSemialgebraicSet},
 )
     _a, _b = MP.promote_variables_with_maps(MP.variables(a), MP.variables(b))
-    return SA.maybe_promote(a, _a...), SA.maybe_promote(b, _b...)
+    return _promote_with_variables(a, _a...), _promote_with_variables(b, _b...)
 end
 
 function _map_polys(p, vars, map)
-    return first.(SA.promote_with_map.(p, Ref(vars), Ref(map)))
+    return first.(_promote_with_variables.(p, Ref(vars), Ref(map)))
 end
 
 function _promote_polys_to_common_variables(polys)
@@ -22,7 +33,7 @@ function _promote_polys_to_common_variables(polys)
     all_vars = MP.variables(polys)
     return [
         first(
-            SA.maybe_promote(
+            _promote_with_variables(
                 p,
                 MP.promote_variables_with_maps(MP.variables(p), all_vars)[1]...,
             ),

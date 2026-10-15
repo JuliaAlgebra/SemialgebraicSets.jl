@@ -28,7 +28,7 @@ function MP.variables(ideal::FixedVariablesIdeal{V}) where {V}
     if generate_nonzero_constant(ideal)
         return V[]
     else
-        return sort(collect(keys(ideal.substitutions)); rev = true)
+        return MP.variables(collect(keys(ideal.substitutions)))
     end
 end
 # In that case, the ideal can generate any polynomial.

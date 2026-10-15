@@ -56,7 +56,9 @@ function MP.variables(
     return MP.variables(S.p)
 end
 function MP.variables(S::BasicSemialgebraicSet)
-    return sort(union(MP.variables(S.V), MP.variables(S.p)); rev = true)
+    (vars, _), _ =
+        MP.promote_variables_with_maps(MP.variables(S.V), MP.variables(S.p))
+    return vars
 end
 function MP.monomial_type(::Type{BasicSemialgebraicSet{T,P,A}}) where {T,P,A}
     M1 = MP.monomial_type(A)
