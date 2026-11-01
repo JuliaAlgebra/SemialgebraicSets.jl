@@ -19,7 +19,3 @@ MutableArithmetics = "1.9"
 Random = "1.10"
 StarAlgebras = "0.4"
 julia = "1.10"
-
-[sources]
-MultivariatePolynomials = {url = "https://github.com/JuliaAlgebra/MultivariatePolynomials.jl", rev = "bl/sa_poly"}
-StarAlgebras = {url = "https://github.com/JuliaAlgebra/StarAlgebras.jl", rev = "bl/term"}
