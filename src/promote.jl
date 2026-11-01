@@ -1,3 +1,10 @@
+function _full_basis_with_variables(
+    ::SA.AbstractBasis{<:MP.BasisElement{B}},
+    vars,
+) where {B}
+    return MP.FullBasis{B}(vars)
+end
+
 _promote_with_variables(a, vars, map) = SA.maybe_promote(a, vars, map)
 
 function _promote_with_variables(
@@ -5,8 +12,8 @@ function _promote_with_variables(
     vars,
     _,
 )
-    basis = MP.FullBasis{MP.Monomial}(vars)
-    return first(SA.promote_bases_with_maps(p, basis))
+    basis = _full_basis_with_variables(SA.basis(parent(p)), vars)
+    return first(SA.promote_bases_with_maps(p, MP.algebra(basis)))
 end
 
 function SA.promote_bases_with_maps(

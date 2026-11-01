@@ -2,6 +2,7 @@ using Test
 
 import StarAlgebras as SA
 import MultivariatePolynomials as MP
+import MultivariateBases as MB
 import DynamicPolynomials
 
 using SemialgebraicSets
@@ -206,5 +207,76 @@ Mod = isdefined(Main, :Mod) ? Main.Mod : DynamicPolynomials
         eq = equalities(new_V)
         @test length(eq) == 1
         @test Set(MP.variables(eq[1])) == Set([x, y, z])
+    end
+
+    @testset "Preserve $B basis" for B in (
+        MP.Monomial,
+        MB.ScaledMonomial,
+        MB.Chebyshev,
+    )
+        full = MP.FullBasis{B}(MP.variables(y * z))
+        index = MP.exponents(y * z^2)
+        keys = [zero.(index), index]
+        for basis in (full, SA.SubBasis(full, keys))
+            coefs =
+                basis === full ? SA.SparseCoefficients(keys, [1.0, 2.0]) :
+                [1.0, 2.0]
+            p = SA.AlgebraElement(coefs, MP.algebra(basis))
+            index = basis === full ? keys[2] : 2
+            t = SA.Term(parent(p), index, 2.0)
+            for operand in (p, t)
+                (space, map_space), (same, map_same) =
+                    SA.promote_bases_with_maps(FullSpace(), operand)
+                @test space isa FullSpace
+                @test map_space === nothing
+                @test same === operand
+                @test map_same === nothing
+
+                domain = @set y + z >= 0
+                (same_domain, map_domain), (same, map_same) =
+                    SA.promote_bases_with_maps(domain, operand)
+                @test same_domain === domain
+                @test map_domain === nothing
+                @test same === operand
+                @test map_same === nothing
+
+                for domain in
+                    (@set(x^2 == 1), @set(x >= 0), @set(x^2 == 1 && x >= 0))
+                    (new_domain, map_domain), (q, map_q) =
+                        SA.promote_bases_with_maps(domain, operand)
+                    @test MP.variables(new_domain) == MP.variables(x * y * z)
+                    @test MP.variables(q) == MP.variables(x * y * z)
+                    @test MP.variables(operand) == MP.variables(y * z)
+                    @test MP.variables(domain) == MP.variables(x)
+                    @test q == operand
+                    @test eltype(SA.basis(parent(q))) <: MP.BasisElement{B}
+                    @test (SA.basis(parent(q)) isa SA.SubBasis) ==
+                          (basis isa SA.SubBasis)
+                    @test map_domain !== nothing
+                    @test map_q !== nothing
+                    @test (q isa SA.Term) == (operand isa SA.Term)
+                    if operand isa SA.Term
+                        @test map_q(operand.index) == q.index
+                    else
+                        @test map(
+                            map_q,
+                            collect(SA.keys(SA.coeffs(operand))),
+                        ) == collect(SA.keys(SA.coeffs(q)))
+                    end
+                end
+            end
+        end
+    end
+
+    @testset "Noncommutative domain promotion" begin
+        DynamicPolynomials.@ncpolyvar a b c
+        domain = @set a >= 0
+        p = b * c + c * b
+        new_domain, q = SA.promote_bases(domain, p)
+        @test MP.variables(new_domain) == [a, b, c]
+        @test MP.variables(q) == [a, b, c]
+        @test q == p
+        @test q isa typeof(p)
+        @test MP.variables(p) == [b, c]
     end
 end
