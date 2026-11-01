@@ -2,7 +2,7 @@ export spolynomial, gröbner_basis, groebner_basis
 export Buchberger, presort!, dummy_selection, normal_selection
 
 """
-    spolynomial(p::AbstractPolynomialLike, q::AbstractPolynomialLike)
+    spolynomial(p::MP.AbstractPolynomialLike, q::MP.AbstractPolynomialLike)
 
 Computes the S-polynomial of `p` and `q` defined by
 ```math
@@ -11,14 +11,14 @@ S(p, q) =  \\frac{m}{\\mathrm{\\mathsc{LT}}(p)} \\cdot p - \\frac{m}{\\mathrm{\\
 where ``m = \\mathrm{lcm}(\\mathrm{\\mathsc{LM}}(p), \\mathrm{\\mathsc{LM}}(q))``.
 """
 function spolynomial(p::_APL, q::_APL)
-    m = lcm(leading_monomial(p), leading_monomial(q))
-    ltp = leading_term(p)
+    m = lcm(MP.leading_monomial(p), MP.leading_monomial(q))
+    ltp = MP.leading_term(p)
     # `MA.operate` ensures that the returned value can be mutated without
     # affecting either `a` or `p`.
-    a = MA.operate(*, MP.div_multiple(m, monomial(ltp)), p)
+    a = MA.operate(*, MP.div_multiple(m, MP.monomial(ltp)), p)
     ad = MA.operate!!(/, a, MP.coefficient(ltp))
-    ltq = leading_term(q)
-    b = MA.operate(*, MP.div_multiple(m, monomial(ltq)), q)
+    ltq = MP.leading_term(q)
+    b = MA.operate(*, MP.div_multiple(m, MP.monomial(ltq)), q)
     bd = MA.operate!!(/, b, MP.coefficient(ltq))
     return MA.operate!!(-, ad, bd)
 end
@@ -32,11 +32,11 @@ function reduce_basis!(F::AbstractVector{<:_APL}; kwargs...)
         for j in eachindex(F)
             G = @view F[setdiff(keep, j)]
             r = rem(F[j], G; kwargs...)
-            if isapproxzero(r; kwargs...)
+            if MP.isapproxzero(r; kwargs...)
                 deleteat!(keep, findfirst(isequal(j), keep))
                 push!(del, j)
                 changed = true # Should probably not set that, no need to do one more loop int this case
-            elseif leading_monomial(r) != leading_monomial(F[j])
+            elseif MP.leading_monomial(r) != MP.leading_monomial(F[j])
                 F[j] = r
                 changed = true
             end
@@ -47,7 +47,7 @@ end
 
 ext(i, j) = (min(i, j), max(i, j))
 
-lcmlm(F, i, j) = lcm(leading_monomial(F[i]), leading_monomial(F[j]))
+lcmlm(F, i, j) = lcm(MP.leading_monomial(F[i]), MP.leading_monomial(F[j]))
 
 function criterion(F, B, i, j)
     m = lcmlm(F, i, j)
@@ -56,7 +56,7 @@ function criterion(F, B, i, j)
            k != j &&
            !(ext(i, k) in B) &&
            !(ext(j, k) in B) &&
-           divides(leading_monomial(F[k]), m)
+           MP.divides(MP.leading_monomial(F[k]), m)
             return true
         end
     end
@@ -73,7 +73,7 @@ end
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition p. 116
 function presort!(F)
-    return sort!(F; by = leading_monomial)
+    return sort!(F; by = MP.leading_monomial)
 end
 
 # Selection of (i, j) ∈ B
@@ -150,12 +150,12 @@ function gröbner_basis!(
     )
     while !isempty(B)
         (i, j) = algo.sel(F, B)
-        lmi = leading_monomial(F[i])
-        lmj = leading_monomial(F[j])
-        if !isconstant(gcd(lmi, lmj)) && !criterion(F, B, i, j)
+        lmi = MP.leading_monomial(F[i])
+        lmj = MP.leading_monomial(F[j])
+        if !MP.isconstant(gcd(lmi, lmj)) && !criterion(F, B, i, j)
             #r = rem(spolynomial(F[i], F[j]), F; ztol=algo.ztol)
             r = rem(spolynomial(F[i], F[j]), F)
-            if !isapproxzero(r; ztol = algo.ztol)
+            if !MP.isapproxzero(r; ztol = algo.ztol)
                 I = eachindex(F)
                 push!(F, r)
                 n = last(eachindex(F))
@@ -167,7 +167,7 @@ function gröbner_basis!(
         delete!(B, (i, j))
     end
     reduce_basis!(F; ztol = algo.ztol)
-    map!(monic, F, F)
+    map!(MP.monic, F, F)
     return F
 end
 function gröbner_basis(F::Vector{<:_APL}, args...)

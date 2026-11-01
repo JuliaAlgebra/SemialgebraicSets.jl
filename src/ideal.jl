@@ -6,7 +6,7 @@ struct EmptyPolynomialIdeal <: AbstractPolynomialIdeal end
 function ideal(p::FullSpace, _ = default_gröbner_basis_algorithm(p))
     return EmptyPolynomialIdeal()
 end
-Base.rem(p::AbstractPolynomialLike, ::EmptyPolynomialIdeal) = p
+Base.rem(p::MP.AbstractPolynomialLike, ::EmptyPolynomialIdeal) = p
 
 mutable struct PolynomialIdeal{
     T,
@@ -25,8 +25,8 @@ function PolynomialIdeal{T,PT}(
 end
 function PolynomialIdeal(p::Vector{PT}, algo) where {PT<:_APL}
     S = promote_for(MP.coefficient_type(PT), typeof(algo))
-    return PolynomialIdeal{S,polynomial_type(PT, S)}(
-        AbstractVector{polynomial_type(PT, S)}(p),
+    return PolynomialIdeal{S,MP.polynomial_type(PT, S)}(
+        AbstractVector{MP.polynomial_type(PT, S)}(p),
         algo,
     )
 end
@@ -56,9 +56,9 @@ function Base.:+(I::PolynomialIdeal, J::PolynomialIdeal)
     )
 end
 
-MP.variables(I::PolynomialIdeal) = variables(I.p)
+MP.variables(I::PolynomialIdeal) = MP.variables(I.p)
 
-function Base.rem(p::AbstractPolynomialLike, I::PolynomialIdeal)
+function Base.rem(p::MP.AbstractPolynomialLike, I::PolynomialIdeal)
     compute_gröbner_basis!(I)
     return rem(p, I.p)
 end
@@ -71,7 +71,7 @@ function compute_gröbner_basis!(I::PolynomialIdeal)
 end
 
 """
-    standard_monomials(I::AbstractPolynomialIdeal, vars = variables(I))
+    standard_monomials(I::AbstractPolynomialIdeal, vars = MP.variables(I))
 
 Return the vector of *standard monomials* in the variables `var` of the ideal
 `I`. A monomial is a *standard monomial* if it is not the leading monomial of
@@ -88,28 +88,32 @@ https://doi.org/10.1007/b138611
 """
 function standard_monomials end
 
-function standard_monomials(I, vars = variables(I))
+function standard_monomials(I, vars = MP.variables(I))
     compute_gröbner_basis!(I)
     if isempty(I.p)
         return nothing # Nonzero dimensional
     end
-    mv = monomial_vector(leading_monomial.(I.p))
+    mv = MP.monomial_vector(MP.leading_monomial.(I.p))
     # monomial_vector makes sure all monomials have the same variables
     # if x_i^n is in the leading monomials, lv[i] <= n
     lv = -ones(Int, length(vars))
     for m in mv
-        d = degree(m)
-        if d == maximum(exponents(m))
+        d = MP.degree(m)
+        if d == maximum(MP.exponents(m))
             # univariate monomial
             if iszero(d)
                 lv[:] .= 0
             else
-                lv[argmax(exponents(m))] = d
+                lv[argmax(MP.exponents(m))] = d
             end
         end
     end
     if any(Base.Fix2(<, 0), lv)
         return nothing # Nonzero dimensional
     end
-    return monomials(vars, 0:(sum(lv)-1), m -> !any(Base.Fix2(divides, m), mv))
+    return MP.monomials(
+        vars,
+        0:(sum(lv)-1),
+        m -> !any(Base.Fix2(MP.divides, m), mv),
+    )
 end

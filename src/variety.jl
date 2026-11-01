@@ -143,7 +143,7 @@ function Base.show(io::IO, V::AbstractAlgebraicSet)
     return print(
         io,
         "{ (",
-        join(variables(V), ", "),
+        join(MP.variables(V), ", "),
         ") | ",
         join(string.(equalities(V)) .* " = 0", ", "),
         " }",
@@ -171,7 +171,7 @@ function elements(V::AlgebraicSet{T,PT,A,S,U}) where {T,PT,A,S,U}
     if V.projective
         I = V.I
         els = Vector{U}[]
-        for v in variables(I)
+        for v in MP.variables(I)
             I1 = I + ideal([v - 1], V.I.algo)
             els1 = elements(AlgebraicSet(I1, V.solver))
             if els1 === nothing

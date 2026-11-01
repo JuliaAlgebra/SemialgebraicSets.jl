@@ -1,16 +1,16 @@
 export FixedVariablesSet
 
 struct FixedVariablesIdeal{
-    V<:AbstractVariable,
+    V<:MP.AbstractVariable,
     T<:Number,
-    MT<:AbstractMonomialLike,
+    MT<:MP.AbstractMonomialLike,
 } <: AbstractPolynomialIdeal
     substitutions::Union{Nothing,Dict{V,T}}
 end
 function Base.convert(
     ::Type{FixedVariablesIdeal{V,T,MT}},
     ideal::FixedVariablesIdeal{V,T,MT},
-) where {V<:AbstractVariable,T<:Number,MT<:AbstractMonomialLike}
+) where {V<:MP.AbstractVariable,T<:Number,MT<:MP.AbstractMonomialLike}
     return ideal
 end
 function Base.convert(
@@ -35,12 +35,12 @@ end
 function generate_nonzero_constant(I::FixedVariablesIdeal)
     return I.substitutions === nothing
 end
-function Base.rem(p::AbstractPolynomialLike, I::FixedVariablesIdeal)
+function Base.rem(p::MP.AbstractPolynomialLike, I::FixedVariablesIdeal)
     if generate_nonzero_constant(I)
         return zero(p)
     else
         substitutions = [key => value for (key, value) in I.substitutions]
-        return subs(p, substitutions...)
+        return MP.subs(p, substitutions...)
     end
 end
 
@@ -86,7 +86,7 @@ function nequalities(set::FixedVariablesSet)
 end
 function equalities(set::FixedVariablesSet{V,T,MT}) where {V,T,MT}
     if set.ideal.substitutions === nothing
-        return [constant_term(one(T), MT)]
+        return [MP.constant_term(one(T), MT)]
     else
         return [key - value for (key, value) in set.ideal.substitutions]
     end
@@ -97,7 +97,7 @@ function Base.intersect(
 ) where {V1,V2,T1,T2,MT1,MT2}
     # For `DynamicPolynomials`, they have the same type and for
     # `TypedPolynomials`, promoting would give `Monomial`.
-    VT = V1 == V2 ? V1 : AbstractVariable
+    VT = V1 == V2 ? V1 : MP.AbstractVariable
     T = promote_type(T1, T2)
     if V.ideal.substitutions === nothing || W.ideal.substitutions === nothing
         sub = nothing
@@ -150,14 +150,14 @@ function Base.iterate(V::FixedVariablesSet, state = nothing)
 end
 Base.length(V::FixedVariablesSet) = isempty(V) ? 0 : 1
 
-struct FixedVariable{V<:AbstractVariable,T}
+struct FixedVariable{V<:MP.AbstractVariable,T}
     variable::V
     value::T
 end
-function equality(variable::AbstractVariable, value::Number)
+function equality(variable::MP.AbstractVariable, value::Number)
     return FixedVariable(variable, value)
 end
-function equality(value::Number, variable::AbstractVariable)
+function equality(value::Number, variable::MP.AbstractVariable)
     return FixedVariable(variable, value)
 end
 

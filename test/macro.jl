@@ -3,7 +3,10 @@ module TestMacro
 using Test
 import MutableArithmetics as MA
 using SemialgebraicSets
-using MultivariatePolynomials
+import MultivariatePolynomials as MP
+import DynamicPolynomials
+
+Mod = isdefined(Main, :Mod) ? Main.Mod : DynamicPolynomials
 
 struct DummySolver <: SemialgebraicSets.AbstractAlgebraicSolver end
 function SemialgebraicSets.default_gröbner_basis_algorithm(p, ::DummySolver)
@@ -13,8 +16,9 @@ SemialgebraicSets.promote_for(::Type{T}, ::Type{DummySolver}) where {T} = T
 
 function _test_polynomial_API(set, vars)
     mono = prod(vars)
-    @test @inferred(variables(set)) == variables(mono)
-    @test @inferred(monomial_type(typeof(set))) == monomial_type(typeof(mono))
+    @test @inferred(MP.variables(set)) == MP.variables(mono)
+    @test @inferred(MP.monomial_type(typeof(set))) ==
+          MP.monomial_type(typeof(mono))
     V = set
     if !(V isa AbstractAlgebraicSet)
         V = algebraic_set(V)
@@ -26,7 +30,7 @@ function _test_polynomial_API(set, vars)
 end
 
 function runtests()
-    Main.Mod.@polyvar x y
+    Mod.@polyvar x y
     @test isa(FullSpace(), FullSpace)
     V = @set x * y == 1
     _test_polynomial_API(V, (x, y))
@@ -51,12 +55,12 @@ function runtests()
         @test S === similar(S, Rational{BigInt})
         @test S.V === similar(S.V, Rational{BigInt})
         @test S.V.I === convert(typeof(S.V.I), S.V.I)
-        @test BasicSemialgebraicSet{Int,polynomial_type(x, Int)}() isa
+        @test BasicSemialgebraicSet{Int,MP.polynomial_type(x, Int)}() isa
               BasicSemialgebraicSet{
             Rational{BigInt},
-            polynomial_type(x, Rational{BigInt}),
+            MP.polynomial_type(x, Rational{BigInt}),
         }
-        @test Int32(2) * x^2 * y isa MultivariatePolynomials.AbstractTerm{Int32}
+        @test Int32(2) * x^2 * y isa MP.AbstractTerm{Int32}
         Sf = similar(S, Float32)
         @test Sf isa BasicSemialgebraicSet{Float32}
         @test Sf.V isa AlgebraicSet{Float32}
@@ -132,24 +136,24 @@ Algebraic Set defined by no equality
         S = @set x == 1 && x ≤ y && 2 == y
         _test_polynomial_API(S, (x, y))
         @test S isa BasicSemialgebraicSet{Int}
-        @test S.V isa FixedVariablesSet{<:AbstractVariable,Int}
+        @test S.V isa FixedVariablesSet{<:MP.AbstractVariable,Int}
         @test rem(x + y, ideal(S.V)) == 3
         @test S === similar(S, Int)
         @test S.V === similar(S.V, Int)
         @test S.V.ideal === convert(typeof(S.V.ideal), S.V.ideal)
         Sf = similar(S, Float64)
         @test Sf isa BasicSemialgebraicSet{Float64}
-        @test Sf.V isa FixedVariablesSet{<:AbstractVariable,Float64}
+        @test Sf.V isa FixedVariablesSet{<:MP.AbstractVariable,Float64}
         @test rem(x + y, ideal(Sf.V)) == 3
 
         S = @set x == 1 && x ≤ y && 2 == y && 1 == x
         _test_polynomial_API(S, (x, y))
         @test S isa BasicSemialgebraicSet{Int}
-        @test S.V isa FixedVariablesSet{<:AbstractVariable,Int}
+        @test S.V isa FixedVariablesSet{<:MP.AbstractVariable,Int}
         @test rem(x + y, ideal(S.V)) == 3
         Sf = similar(S, Float64)
         @test Sf isa BasicSemialgebraicSet{Float64}
-        @test Sf.V isa FixedVariablesSet{<:AbstractVariable,Float64}
+        @test Sf.V isa FixedVariablesSet{<:MP.AbstractVariable,Float64}
         @test rem(x + y, ideal(Sf.V)) == 3
 
         @testset "Empty" begin
@@ -161,7 +165,7 @@ Algebraic Set defined by no equality
                 @set(x ≤ y && y == 3 && x == 1 && y == 3 && x == 2)
             )
                 @test S isa BasicSemialgebraicSet{Int}
-                @test S.V isa FixedVariablesSet{<:AbstractVariable,Int}
+                @test S.V isa FixedVariablesSet{<:MP.AbstractVariable,Int}
                 _test_polynomial_API(S, (x, y))
                 @test isempty(S.V)
                 @test iszero(length(S.V))
