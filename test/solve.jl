@@ -144,18 +144,18 @@ end
     B = standard_monomials(V.I)
     @test !isnothing(B)
     @test B == [
-        y^3 * z,
-        x * y * z,
-        y^3,
-        y^2 * z,
-        x * y,
-        x * z,
-        y^2,
-        y * z,
-        x,
-        y,
-        z,
         1,
+        z,
+        y,
+        x,
+        y * z,
+        y^2,
+        x * z,
+        x * y,
+        y^2 * z,
+        y^3,
+        x * y * z,
+        y^3 * z,
     ]
     testelements(
         V,

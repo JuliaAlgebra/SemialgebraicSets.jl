@@ -23,8 +23,8 @@ function PolynomialIdeal{T,PT}(
 ) where {T,PT<:_APL{T},A<:AbstractGröbnerBasisAlgorithm}
     return PolynomialIdeal{T,PT,A}(p, false, algo)
 end
-function PolynomialIdeal(p::Vector{PT}, algo) where {T,PT<:_APL{T}}
-    S = promote_for(T, typeof(algo))
+function PolynomialIdeal(p::Vector{PT}, algo) where {PT<:_APL}
+    S = promote_for(MP.coefficient_type(PT), typeof(algo))
     return PolynomialIdeal{S,polynomial_type(PT, S)}(
         AbstractVector{polynomial_type(PT, S)}(p),
         algo,

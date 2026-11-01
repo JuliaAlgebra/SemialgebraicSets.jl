@@ -26,8 +26,8 @@ include("newton_type.jl")
 
 function default_multiplication_matrices_solver(
     ::AbstractVector{PT},
-) where {T,PT<:_APL{T}}
-    return default_multiplication_matrices_solver(T)
+) where {PT<:_APL}
+    return default_multiplication_matrices_solver(MP.coefficient_type(PT))
 end
 
 function default_multiplication_matrices_solver(::Type{T}) where {T}

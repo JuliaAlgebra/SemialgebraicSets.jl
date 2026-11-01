@@ -2,11 +2,14 @@ using Test
 
 import StarAlgebras as SA
 import MultivariatePolynomials as MP
+import DynamicPolynomials
 
 using SemialgebraicSets
 
+Mod = isdefined(Main, :Mod) ? Main.Mod : DynamicPolynomials
+
 @testset "promote_bases_with_maps" begin
-    Main.Mod.@polyvar x y z
+    Mod.@polyvar x y z
 
     @testset "FullSpace with polynomial" begin
         f = FullSpace()
@@ -58,6 +61,9 @@ using SemialgebraicSets
         new_eq = equalities(new_V)
         @test length(new_eq) == 1
         @test Set(MP.variables(new_eq[1])) == Set([x, y, z])
+        @test new_eq[1] == x^2 - 1
+        @test new_p == p
+        @test Set(MP.variables(p)) == Set([y, z])
     end
 
     @testset "AlgebraicSet with AlgebraicSet - same variables" begin
@@ -68,6 +74,17 @@ using SemialgebraicSets
         @test map_V1 === nothing
         @test new_V2 === V2
         @test map_V2 === nothing
+    end
+
+    @testset "AlgebraicSet with term" begin
+        V = @set x^2 == 1
+        p = 2y
+        (new_V, map_V), (new_p, map_p) = SA.promote_bases_with_maps(V, p)
+        @test Set(MP.variables(new_p)) == Set([x, y])
+        @test new_p == p
+        @test only(equalities(new_V)) == x^2 - 1
+        @test map_V !== nothing
+        @test map_p !== nothing
     end
 
     @testset "AlgebraicSet with AlgebraicSet - different variables" begin
@@ -172,6 +189,7 @@ using SemialgebraicSets
         ineqs = inequalities(S)
         @test MP.variables(ineqs[1]) == MP.variables(ineqs[2])
         @test Set(MP.variables(ineqs[1])) == Set([x, y])
+        @test ineqs == [x - 1, y - 1]
 
         V = @set x^2 == 1 && y^2 == 4
         eqs = equalities(V)
