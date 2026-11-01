@@ -5,10 +5,9 @@ using Random
 import MutableArithmetics as MA
 import StarAlgebras as SA
 
-using MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 
-const _APL = AbstractPolynomialLike
+const _APL = MP.AbstractPolynomialLike
 
 import CommonSolve: solve
 

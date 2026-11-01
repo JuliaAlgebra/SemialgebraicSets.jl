@@ -1,3 +1,11 @@
+using Test
+using SemialgebraicSets
+
+import MultivariatePolynomials as MP
+import DynamicPolynomials
+
+Mod = isdefined(Main, :Mod) ? Main.Mod : DynamicPolynomials
+
 # CLO15
 # Ideals, Varieties, and Algorithms
 # Cox, Little and O'Shea, Fourth edition, 2015
@@ -23,7 +31,7 @@ end
     Mod.@polyvar x y z
     function testg(G, H)
         presort!(G)
-        _isz(f) = isapproxzero(rem(f, H))
+        _isz(f) = MP.isapproxzero(rem(f, H))
         @test all(_isz.(G - H))
     end
     function testf(F, H)

@@ -54,11 +54,11 @@ end
 struct GröbnerBasisMultiplicationMatricesAlgorithm <:
        AbstractMultiplicationMatricesAlgorithm end
 
-function multiplication_matrix(V, v::AbstractVariable, B)
+function multiplication_matrix(V, v::MP.AbstractVariable, B)
     M = Matrix{eltype(eltype(V))}(undef, length(B), length(B))
     for i in 1:length(B)
         p = rem(v * B[i], equalities(V))
-        M[:, i] = coefficients(p, B)
+        M[:, i] = MP.coefficients(p, B)
     end
     return M
 end
@@ -67,7 +67,7 @@ function multiplication_matrices(
     V,
     ::GröbnerBasisMultiplicationMatricesAlgorithm,
 )
-    vars = variables(V.I)
+    vars = MP.variables(V.I)
     B = standard_monomials(V.I, vars)
     if isnothing(B)
         return

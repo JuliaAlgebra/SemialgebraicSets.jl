@@ -1,13 +1,13 @@
 export @set
 
-struct PolynomialInequality{PT<:AbstractPolynomialLike}
+struct PolynomialInequality{PT<:MP.AbstractPolynomialLike}
     p::PT
 end
 function Base.intersect(ineq::PolynomialInequality; kws...)
     return BasicSemialgebraicSet(FullSpace(), [ineq.p])
 end
 
-struct PolynomialEquality{PT<:AbstractPolynomialLike}
+struct PolynomialEquality{PT<:MP.AbstractPolynomialLike}
     p::PT
 end
 function equality(lhs, rhs)

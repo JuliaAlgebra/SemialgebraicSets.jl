@@ -1,7 +1,6 @@
 using Test
 
-using MultivariatePolynomials
-const MP = MultivariatePolynomials
+import MultivariatePolynomials as MP
 
 using SemialgebraicSets
 

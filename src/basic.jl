@@ -97,7 +97,7 @@ function Base.show(io::IO, V::BasicSemialgebraicSet)
     print(
         io,
         "{ (",
-        join(variables(V), ", "),
+        join(MP.variables(V), ", "),
         ") | ",
         join(string.(equalities(V)) .* " = 0", ", "),
     )
