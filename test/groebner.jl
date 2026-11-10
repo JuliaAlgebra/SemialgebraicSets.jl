@@ -73,3 +73,34 @@ end
     #V3 = @set x == y^2
     #@test rem(x^2 + 3x*y + 2y + y^4, ideal(V3)) == rem(2y^4 + 3y^3 + 2y, ideal(V3))
 end
+
+@testset "is_gröbner_basis" begin
+    Mod.@polyvar x y
+    @test SemialgebraicSets.is_gröbner_basis(ideal(FullSpace()))
+    @test SemialgebraicSets.is_gröbner_basis(ideal(typeof(x + y)[]))
+    @test SemialgebraicSets.is_gröbner_basis(ideal(@set x == 1))
+    # A single polynomial always forms a Gröbner basis
+    I = ideal(@set x^3 == x * y)
+    @test SemialgebraicSets.is_gröbner_basis(I)
+    @test rem(x^4, I) == x^2 * y
+    V = @set x * y == 1 && x^2 == y
+    I = ideal(V)
+    @test !SemialgebraicSets.is_gröbner_basis(I)
+    @test rem(y^2, I) == x
+    @test SemialgebraicSets.is_gröbner_basis(I)
+    add_equality!(V, y - 1)
+    @test !SemialgebraicSets.is_gröbner_basis(I)
+    @test rem(y, I) == 1
+end
+
+@testset "coefficient_type" begin
+    Mod.@polyvar x y
+    V = @set x * y == 1
+    @test MP.coefficient_type(typeof(V)) == Rational{BigInt}
+    @test MP.coefficient_type(typeof(ideal(V))) == Rational{BigInt}
+    F = @set x == 1.0
+    @test MP.coefficient_type(typeof(F)) == Float64
+    @test MP.coefficient_type(typeof(ideal(F))) == Float64
+    S = @set x * y == 1 && x >= 0
+    @test MP.coefficient_type(typeof(S)) == Rational{BigInt}
+end

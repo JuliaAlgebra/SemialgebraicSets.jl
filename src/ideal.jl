@@ -17,6 +17,8 @@ mutable struct PolynomialIdeal{
     gröbner_basis::Bool
     algo::A
 end
+MP.coefficient_type(::Type{<:PolynomialIdeal{T}}) where {T} = T
+
 function PolynomialIdeal{T,PT}(
     p::Vector{PT},
     algo::A,
@@ -68,6 +70,24 @@ function compute_gröbner_basis!(I::PolynomialIdeal)
         gröbner_basis!(I.p, I.algo)
         I.gröbner_basis = true
     end
+end
+
+"""
+    is_gröbner_basis(I::AbstractPolynomialIdeal)
+
+Return whether the generators of `I` are known to form a Gröbner basis.
+If it returns `true` then `rem(p, I)` does not need to compute a Gröbner basis
+(it may still normalize the generators, e.g., make them monic).
+If it returns `false`, `rem(p, I)` would first compute a Gröbner basis with
+[`compute_gröbner_basis!`](@ref), which may be expensive.
+"""
+function is_gröbner_basis end
+
+is_gröbner_basis(::EmptyPolynomialIdeal) = true
+
+function is_gröbner_basis(I::PolynomialIdeal)
+    # A single polynomial always forms a Gröbner basis
+    return I.gröbner_basis || length(I.p) <= 1
 end
 
 """
