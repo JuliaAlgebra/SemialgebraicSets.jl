@@ -44,6 +44,9 @@ function Base.rem(p::MP.AbstractPolynomialLike, I::FixedVariablesIdeal)
     end
 end
 
+# The substitutions already form a Gröbner basis
+is_gröbner_basis(::FixedVariablesIdeal) = true
+
 struct FixedVariablesSet{V,T,MT} <: AbstractAlgebraicSet
     ideal::FixedVariablesIdeal{V,T,MT}
 end
