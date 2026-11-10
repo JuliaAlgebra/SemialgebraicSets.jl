@@ -73,3 +73,18 @@ end
     #V3 = @set x == y^2
     #@test rem(x^2 + 3x*y + 2y + y^4, ideal(V3)) == rem(2y^4 + 3y^3 + 2y, ideal(V3))
 end
+
+@testset "is_gröbner_basis" begin
+    Mod.@polyvar x y
+    @test SemialgebraicSets.is_gröbner_basis(ideal(FullSpace()))
+    @test SemialgebraicSets.is_gröbner_basis(ideal(typeof(x + y)[]))
+    @test SemialgebraicSets.is_gröbner_basis(ideal(@set x == 1))
+    V = @set x * y == 1 && x^2 == y
+    I = ideal(V)
+    @test !SemialgebraicSets.is_gröbner_basis(I)
+    @test rem(y^2, I) == x
+    @test SemialgebraicSets.is_gröbner_basis(I)
+    add_equality!(V, y - 1)
+    @test !SemialgebraicSets.is_gröbner_basis(I)
+    @test rem(y, I) == 1
+end

@@ -71,6 +71,22 @@ function compute_gröbner_basis!(I::PolynomialIdeal)
 end
 
 """
+    is_gröbner_basis(I::AbstractPolynomialIdeal)
+
+Return whether the generators of `I` are known to form a Gröbner basis.
+If it returns `true` then `rem(p, I)` does not need to compute a Gröbner basis.
+If it returns `false`, `rem(p, I)` would first compute a Gröbner basis with
+[`compute_gröbner_basis!`](@ref), which may be expensive.
+"""
+function is_gröbner_basis end
+
+is_gröbner_basis(::EmptyPolynomialIdeal) = true
+
+function is_gröbner_basis(I::PolynomialIdeal)
+    return I.gröbner_basis || isempty(I.p)
+end
+
+"""
     standard_monomials(I::AbstractPolynomialIdeal, vars = MP.variables(I))
 
 Return the vector of *standard monomials* in the variables `var` of the ideal
