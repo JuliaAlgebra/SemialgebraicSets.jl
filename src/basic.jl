@@ -32,6 +32,7 @@ end
 
 algebraic_set(set::BasicSemialgebraicSet) = set.V
 
+MP.coefficient_type(::Type{<:BasicSemialgebraicSet{T}}) where {T} = T
 function MP.similar_type(
     ::Type{BasicSemialgebraicSet{S,PS,AT}},
     T::Type,

@@ -47,6 +47,7 @@ function AlgebraicSet(p::Vector, algo::AbstractGröbnerBasisAlgorithm, solver)
     return AlgebraicSet(ideal(p, algo), solver)
 end
 
+MP.coefficient_type(::Type{<:AlgebraicSet{T}}) where {T} = T
 function MP.similar_type(
     ::Type{AlgebraicSet{U,PU,A,S,UU}},
     T::Type,
@@ -130,6 +131,7 @@ equalities(V::AlgebraicSet) = V.I.p
 function add_equality!(V::AlgebraicSet, p)
     push!(V.I.p, p)
     V.I.p .= _promote_polys_to_common_variables(V.I.p)
+    V.I.gröbner_basis = false
     return nothing
 end
 function Base.intersect(S::AlgebraicSet, T::AlgebraicSet)

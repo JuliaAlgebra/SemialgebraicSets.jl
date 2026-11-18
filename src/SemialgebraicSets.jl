@@ -64,6 +64,7 @@ include("variety.jl")
 include("basic.jl")
 
 include("fix.jl")
+include("truncated.jl")
 include("promote.jl")
 include("macro.jl")
 
