@@ -83,7 +83,7 @@ end
 function Base.convert(
     ::Type{TruncatedAlgebraicSet{T,V}},
     set::TruncatedAlgebraicSet{T,V},
-) where {T,V}
+) where {T,V<:AlgebraicSet{T}}
     return set
 end
 function Base.convert(

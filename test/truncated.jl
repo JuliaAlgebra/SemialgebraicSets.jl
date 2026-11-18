@@ -13,6 +13,7 @@ Mod = isdefined(Main, :Mod) ? Main.Mod : DynamicPolynomials
     W = truncated(V, 3)
     @test W isa SemialgebraicSets.TruncatedAlgebraicSet
     @test W isa AbstractAlgebraicSet
+    @test convert(typeof(W), W) === W
     @test equalities(W) == equalities(V)
     @test SemialgebraicSets.nequalities(W) == 2
     @test MP.variables(W) == MP.variables(V)
