@@ -198,6 +198,24 @@ Mod = isdefined(Main, :Mod) ? Main.Mod : DynamicPolynomials
         @test Set(MP.variables(eqs[1])) == Set([x, y])
     end
 
+    @testset "Polynomials with a subset of the variables of the set" begin
+        S = @set y >= 1 && x == y
+        @test MP.variables(only(inequalities(S))) != MP.variables(S)
+        p = x - y
+        (new_S, map_S), (new_p, map_p) = SA.promote_bases_with_maps(S, p)
+        @test map_S === nothing
+        @test new_p === p
+        @test map_p === nothing
+        @test MP.variables(only(inequalities(new_S))) == MP.variables(p)
+        @test MP.variables(only(equalities(new_S))) == MP.variables(p)
+        @test inequalities(new_S) == inequalities(S)
+        @test equalities(new_S) == equalities(S)
+        V = @set x == y
+        SemialgebraicSets.compute_gröbner_basis!(ideal(V))
+        (new_V, _), _ = SA.promote_bases_with_maps(V, z)
+        @test ideal(new_V).gröbner_basis
+    end
+
     @testset "AlgebraicSet with polynomial - overlapping variables" begin
         V = @set x + y == 1
         p = y + z

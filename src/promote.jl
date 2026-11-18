@@ -7,6 +7,31 @@ end
 
 _promote_with_variables(a, vars, map) = SA.maybe_promote(a, vars, map)
 
+# The variables of the polynomials of a set may be a strict subset of the
+# variables of the set, e.g., `@set x >= 0 && y == 0` so even if the variables
+# of the set do not change, its polynomials may need to be promoted.
+function _promote_with_variables(set::AbstractSemialgebraicSet, vars, map)
+    if isnothing(map) && !_needs_promotion(set, vars)
+        return set, map
+    end
+    return SA.promote_with_map(set, vars, map)
+end
+
+_needs_promotion(::AbstractSemialgebraicSet, _) = false
+
+function _needs_promotion(polys::AbstractVector, vars)
+    return any(p -> MP.variables(p) != vars, polys)
+end
+
+function _needs_promotion(set::AlgebraicSet, vars)
+    return _needs_promotion(equalities(set), vars)
+end
+
+function _needs_promotion(set::BasicSemialgebraicSet, vars)
+    return _needs_promotion(set.V, vars) ||
+           _needs_promotion(inequalities(set), vars)
+end
+
 function _promote_with_variables(
     p::Union{MP.AbstractPolynomial,MP.AbstractTerm},
     vars,
@@ -51,6 +76,9 @@ end
 function SA.promote_with_map(set::AlgebraicSet, new_vars, exponent_map)
     new_polys = _map_polys(equalities(set), new_vars, exponent_map)
     new_I = PolynomialIdeal(new_polys, set.I.algo)
+    # Adding variables that do not appear in the polynomials does not change
+    # whether they form a Gröbner basis
+    new_I.gröbner_basis = set.I.gröbner_basis
     new_set = AlgebraicSet(new_I, set.solver)
     return new_set, exponent_map
 end
