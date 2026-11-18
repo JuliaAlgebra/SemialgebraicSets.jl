@@ -94,6 +94,15 @@ function Base.convert(
 end
 
 MP.variables(V::TruncatedAlgebraicSet) = MP.variables(V.set)
+
+function SA.promote_with_map(V::TruncatedAlgebraicSet, new_vars, exponent_map)
+    new_set, _ = SA.promote_with_map(V.set, new_vars, exponent_map)
+    return truncated(new_set, V.maxdegree), exponent_map
+end
+
+function _needs_promotion(V::TruncatedAlgebraicSet, vars)
+    return _needs_promotion(V.set, vars)
+end
 function MP.monomial_type(::Type{<:TruncatedAlgebraicSet{T,V}}) where {T,V}
     return MP.monomial_type(V)
 end
