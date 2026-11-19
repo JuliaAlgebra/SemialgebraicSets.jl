@@ -168,9 +168,6 @@ function standard_monomials(I, vars = MP.variables(I))
     if any(Base.Fix2(<, 0), lv)
         return nothing # Nonzero dimensional
     end
-    return MP.monomials(
-        vars,
-        0:(sum(lv)-1),
-        m -> !any(Base.Fix2(MP.divides, m), mv),
-    )
+    # The exponent of `vars[i]` in a standard monomial is smaller than `lv[i]`
+    return standard_monomials(I, vars, sum(lv) - length(vars))
 end
