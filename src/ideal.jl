@@ -108,6 +108,43 @@ https://doi.org/10.1007/b138611
 """
 function standard_monomials end
 
+"""
+    standard_monomials(I::PolynomialIdeal, vars, maxdegree::Integer)
+
+Return the vector of *standard monomials* of the ideal `I` in the variables
+`vars` of degree at most `maxdegree`. As the standard monomials form an order
+ideal, the standard monomials of degree `d + 1` are obtained by multiplying
+the standard monomials of degree `d` by each variable and keeping the standard
+ones. The time complexity is therefore proportional to the number of standard
+monomials and not to the number of monomials of degree at most `maxdegree`.
+"""
+function standard_monomials(I::PolynomialIdeal, vars, maxdegree::Integer)
+    compute_gröbner_basis!(I)
+    leading = [MP.exponents(MP.leading_monomial(p), vars) for p in I.p]
+    is_standard(e) = !any(l -> all(l .<= e), leading)
+    current = [zeros(Int, length(vars))]
+    if maxdegree < 0 || !is_standard(first(current))
+        empty!(current)
+    end
+    exponents = copy(current)
+    for _ in 1:maxdegree
+        next = Set{Vector{Int}}()
+        for e in current
+            for i in eachindex(vars)
+                f = copy(e)
+                f[i] += 1
+                if is_standard(f)
+                    push!(next, f)
+                end
+            end
+        end
+        current = collect(next)
+        append!(exponents, current)
+    end
+    M = MP.monomial_type(prod(vars))
+    return MP.monomial_vector(M[prod(vars .^ e) for e in exponents])
+end
+
 function standard_monomials(I, vars = MP.variables(I))
     compute_gröbner_basis!(I)
     if isempty(I.p)
