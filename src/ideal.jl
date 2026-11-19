@@ -128,6 +128,9 @@ function standard_monomials(I::PolynomialIdeal, vars, maxdegree::Integer)
     end
     exponents = copy(current)
     for _ in 1:maxdegree
+        if isempty(current)
+            break
+        end
         next = Set{Vector{Int}}()
         for e in current
             for i in eachindex(vars)
