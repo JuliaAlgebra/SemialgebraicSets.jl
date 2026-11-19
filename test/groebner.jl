@@ -104,3 +104,20 @@ end
     S = @set x * y == 1 && x >= 0
     @test MP.coefficient_type(typeof(S)) == Rational{BigInt}
 end
+
+@testset "standard_monomials up to a degree" begin
+    Mod.@polyvar x y
+    vars = MP.variables(x * y)
+    I = ideal(@set x^2 == 1)
+    @test standard_monomials(I, vars, 3) ==
+          MP.monomial_vector([1, x, y, x * y, y^2, x * y^2, y^3])
+    @test standard_monomials(I, vars, 0) == MP.monomial_vector([x^0])
+    @test isempty(standard_monomials(I, vars, -1))
+    # Zero-dimensional
+    V = @set x * y == 1 && x^2 == y
+    I = ideal(V)
+    @test standard_monomials(I, vars, 10) == standard_monomials(I, vars)
+    # The ideal contains `1`
+    I = ideal([x^0 + 0 * x * y])
+    @test isempty(standard_monomials(I, vars, 2))
+end
